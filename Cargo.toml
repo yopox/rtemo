@@ -1,0 +1,33 @@
+[package]
+name = "rtemo"
+version = "0.1.0"
+authors = ["yopox <yopoxdev@gmail.com>"]
+description = "A text mode editor."
+edition = "2021"
+exclude = ["dist", "build", "assets", "credits"]
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.dev]
+opt-level = 1
+
+[profile.release]
+lto = true
+codegen-units = 1
+
+[dependencies]
+bevy = { version = "0.9", default-features = false, features = ["bevy_asset", "bevy_winit", "render", "png", "x11"] }
+bevy_asset_loader = { version = "0.14.1", default-features = false, features = ["2d"] }
+bevy_common_assets = { version = "0.4", features = ["ron"] }
+bevy_text_mode = { path = "../bevy_text_mode" }
+
+rand = { version = "0.8.5", features = ["alloc"]}
+bevy_pkv = { version = "0.6" }
+serde = { version = "1.0.147" }
+
+winit = { version = "0.27", default-features = false }
+image = { version = "0.24", default-features = false }
+
+[build-dependencies]
+embed-resource = "1.4"
