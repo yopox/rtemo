@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy_text_mode::TextModePlugin;
 use crate::loading::LoadingPlugin;
 use crate::mouse::MousePlugin;
+use crate::quick_tiles::QuickTilesPlugin;
 use crate::toolbar::ToolbarPlugin;
 
 mod loading;
@@ -9,6 +10,7 @@ mod toolbar;
 mod tools;
 mod util;
 mod mouse;
+mod quick_tiles;
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 enum AppState {
@@ -41,6 +43,7 @@ fn main() {
         .add_plugin(ToolbarPlugin)
         .add_plugin(TextModePlugin)
         .add_plugin(MousePlugin)
+        .add_plugin(QuickTilesPlugin)
         .add_plugin(tools::ToolsPlugin)
         .add_startup_system(init)
         .run();

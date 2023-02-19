@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
-use crate::{AppState, tools, util, WIDTH};
+use crate::{AppState, HEIGHT, tools, util, WIDTH};
 use crate::loading::Textures;
 use crate::mouse::{Clicked, Hover};
 
@@ -37,8 +37,6 @@ struct ToolbarUI;
 
 enum ToolbarItem {
     Tool(Entity),
-    Tile(usize),
-    Separator
 }
 
 #[derive(Resource)]
@@ -67,14 +65,10 @@ fn update_toolbar(
             match *item {
                 ToolbarItem::Tool(e) => {
                     if let Ok(mut t) = transform.get_mut(e) {
-                        t.translation.x = (WIDTH - items.0.len() as f32 * util::size::ICON) / 2.
-                            + n as f32 * util::size::ICON;
-                        t.translation.y = 4.;
+                        t.translation.x = 0.;
+                        t.translation.y = HEIGHT - ((HEIGHT - items.0.len() as f32 * util::size::ICON) / 2.
+                            + n as f32 * util::size::ICON) - util::size::ICON;
                     }
-                }
-                ToolbarItem::Tile(_) => {
-                }
-                ToolbarItem::Separator => {
                 }
             }
         }
