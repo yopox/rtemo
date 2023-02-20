@@ -61,4 +61,25 @@ impl Palette {
             Palette::Sand => Color::hex("e5ca9f"),
         }.unwrap()
     }
+
+    pub fn from_usize(n: usize) -> Color {
+        match n {
+            1 => Palette::White,
+            2 => Palette::Blue0,
+            3 => Palette::Blue1,
+            4 => Palette::Blue2,
+            5 => Palette::Blue3,
+            6 => Palette::Green0,
+            7 => Palette::Green1,
+            8 => Palette::Red0,
+            9 => Palette::Red1,
+            10 => Palette::Pink,
+            11 => Palette::Beige,
+            12 => Palette::Orange0,
+            13 => Palette::Orange1,
+            14 => Palette::Yellow,
+            15 => Palette::Sand,
+            _ => Palette::Black,
+        }.color()
+    }
 }

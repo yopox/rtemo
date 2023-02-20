@@ -19,6 +19,7 @@ impl Plugin for QuickTilesPlugin {
                 .with_system(update)
                 .with_system(on_click)
                 .with_system(update_active_tile)
+                .with_system(update_colors)
             )
             .add_system_set(SystemSet::on_exit(AppState::Editor).with_system(cleanup));
     }
@@ -58,7 +59,7 @@ fn setup(
 ) {
     // Quick tiles
     let mut tiles = Vec::new();
-    let dx = 32.;
+    let dx = 56.;
     for i in 0..64 {
         let id = commands
             .spawn(TextModeSpriteSheetBundle {
@@ -100,7 +101,7 @@ fn setup(
             },
             texture_atlas: textures.mrmotext.clone(),
             transform: Transform {
-                translation: Vec3::new(WIDTH - 24., 8., util::z::TOOLBAR),
+                translation: Vec3::new(32., 8., util::z::TOOLBAR),
                 scale: Vec3::new(2., 2., 1.),
                 ..Default::default()
             },
@@ -171,6 +172,17 @@ fn update_active_tile(
     for SelectTile(i) in select_tile.iter() {
         let mut tile = tile.single_mut();
         tile.index = *i;
+    }
+}
+
+fn update_colors(
+    mut color: EventReader<SelectColor>,
+    mut sprites: Query<&mut TextModeTextureAtlasSprite, With<ActiveTile>>,
+) {
+    for SelectColor(i, bg) in color.iter() {
+        let mut sprite = sprites.single_mut();
+        if *bg { sprite.bg = util::Palette::from_usize(*i); }
+        else { sprite.fg = util::Palette::from_usize(*i); }
     }
 }
 
