@@ -65,8 +65,8 @@ fn update_toolbar(
             match *item {
                 ToolbarItem::Tool(e) => {
                     if let Ok(mut t) = transform.get_mut(e) {
-                        t.translation.x = 0.;
-                        t.translation.y = HEIGHT - ((HEIGHT - items.0.len() as f32 * util::size::ICON) / 2.
+                        t.translation.x = 8.;
+                        t.translation.y = HEIGHT - ((HEIGHT - items.0.len() as f32 * util::size::ICON - 72.) / 2.
                             + n as f32 * util::size::ICON) - util::size::ICON;
                     }
                 }
@@ -153,7 +153,7 @@ fn on_click(
     mut selected: ResMut<SelectedTool>,
     tools: Query<&Tool>,
 ) {
-    for Clicked(id) in ev.iter() {
+    for Clicked(id, _) in ev.iter() {
         if tools.iter().any(|tool_id| tool_id.name == *id) {
             selected.0 = id.clone();
             update.send(UpdateToolbar);

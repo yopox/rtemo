@@ -27,7 +27,7 @@ pub struct Clickable {
 #[derive(Component)]
 pub struct Hover;
 
-pub struct Clicked(pub String);
+pub struct Clicked(pub String, pub bool);
 
 /// Assuming [Clickable]-s have the [bevy::sprite::Anchor::BottomLeft] anchor:
 /// - adds [Hover] component to entities with [Clickable] & [Transform] being hovered
@@ -43,7 +43,8 @@ fn update(
         commands.entity(e).remove::<Hover>();
     }
 
-    let clicked = mouse.just_pressed(MouseButton::Left);
+    let clicked_left = mouse.just_pressed(MouseButton::Left);
+    let clicked_right = mouse.just_pressed(MouseButton::Right);
     let window = windows.get_primary().unwrap();
     if let Some(pos) = window.cursor_position() {
         for (e, t, c) in buttons.iter() {
@@ -51,7 +52,7 @@ fn update(
             let y = t.translation.y + c.h / 2.;
             let hover = (pos.x / 4. - x).abs() <= c.w / 2. && (pos.y / 4. - y).abs() <= c.h / 2.;
             if hover { commands.entity(e).insert(Hover); }
-            if hover && clicked { ev.send(Clicked(c.id.clone())); }
+            if hover && (clicked_left || clicked_right) { ev.send(Clicked(c.id.clone(), clicked_right)); }
         }
     }
 }

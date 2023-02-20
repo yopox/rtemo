@@ -21,6 +21,8 @@ bevy = { version = "0.9", default-features = false, features = ["bevy_asset", "b
 bevy_asset_loader = { version = "0.14.1", default-features = false, features = ["2d"] }
 bevy_common_assets = { version = "0.4", features = ["ron"] }
 bevy_text_mode = { path = "../bevy_text_mode" }
+strum = "0.24.1"
+strum_macros = "0.24.3"
 
 rand = { version = "0.8.5", features = ["alloc"]}
 bevy_pkv = { version = "0.6" }

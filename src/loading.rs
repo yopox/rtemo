@@ -26,4 +26,7 @@ pub struct Textures {
 
     #[asset(path = "slot.png")]
     pub slot: Handle<Image>,
+
+    #[asset(path = "color.png")]
+    pub color: Handle<Image>,
 }
