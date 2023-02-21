@@ -1,9 +1,9 @@
 use bevy::prelude::*;
-use bevy::prelude::shape::Quad;
 use bevy::sprite::Anchor;
 use bevy_text_mode::{TextModeSpriteSheetBundle, TextModeTextureAtlasSprite};
 use strum::IntoEnumIterator;
-use crate::{AppState, util, WIDTH};
+
+use crate::{AppState, util};
 use crate::loading::Textures;
 use crate::mouse::{Clickable, Clicked, Hover};
 
@@ -119,7 +119,7 @@ fn setup(
                     anchor: Anchor::BottomLeft,
                     ..Default::default()
                 },
-                transform: Transform::from_xyz(8. + 8. * (i / 8) as f32, 64. - 8. * (i % 8) as f32, 0.),
+                transform: Transform::from_xyz(8. + 8. * (i % 2) as f32, 64. - 8. * (i / 2) as f32, 0.),
                 texture: textures.color.clone(),
                 ..Default::default()
             })
