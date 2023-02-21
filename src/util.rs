@@ -12,9 +12,14 @@ pub mod tool_priority {
 
 pub mod size {
     pub const ICON: f32 = 16.;
+    pub const GRID_X: usize = 32;
+    pub const GRID_Y: usize = 16;
+    pub const LEFT_MARGIN: f32 = 32.;
+    pub const BOTTOM_MARGIN: f32 = 32.;
 }
 
 pub mod z {
+    pub const GRID: f32 = 0.;
     pub const TOOLBAR: f32 = 1.;
     pub const TOOLBAR_ICONS_BG: f32 = 1.5;
     pub const TOOLBAR_ICONS: f32 = 2.;

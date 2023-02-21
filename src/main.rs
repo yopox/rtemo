@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 use bevy_text_mode::TextModePlugin;
+
+use crate::grid::GridPlugin;
 use crate::loading::LoadingPlugin;
 use crate::mouse::MousePlugin;
 use crate::quick_tiles::QuickTilesPlugin;
@@ -11,6 +13,7 @@ mod tools;
 mod util;
 mod mouse;
 mod quick_tiles;
+mod grid;
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 enum AppState {
@@ -23,7 +26,7 @@ const HEIGHT: f32 = 8. * 25.;
 
 fn main() {
     App::new()
-        .insert_resource(ClearColor(Color::hex("100000").unwrap()))
+        .insert_resource(ClearColor(Color::hex("30303a").unwrap()))
         .insert_resource(Msaa { samples: 1 })
         .add_plugins(DefaultPlugins
             .set(ImagePlugin::default_nearest())
@@ -40,6 +43,7 @@ fn main() {
         )
         .add_state(AppState::Loading)
         .add_plugin(LoadingPlugin)
+        .add_plugin(GridPlugin)
         .add_plugin(ToolbarPlugin)
         .add_plugin(TextModePlugin)
         .add_plugin(MousePlugin)
