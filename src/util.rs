@@ -30,7 +30,7 @@ pub mod misc {
     pub const DEFAULT_TILE: usize = 1;
 }
 
-#[derive(EnumIter)]
+#[derive(EnumIter, Copy, Clone)]
 pub enum Palette {
     Black,
     White,

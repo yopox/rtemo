@@ -15,9 +15,11 @@ pub struct GridPlugin;
 impl Plugin for GridPlugin {
     fn build(&self, app: &mut App) {
         app
+            .add_event::<GridChanged>()
             .add_system_set(SystemSet::on_enter(AppState::Editor).with_system(setup))
             .add_system_set(SystemSet::on_update(AppState::Editor)
                 .with_system(update_hover_tile)
+                .with_system(update_grid)
             )
             .add_system_set(SystemSet::on_exit(AppState::Editor).with_system(cleanup));
     }
@@ -57,6 +59,8 @@ pub struct Grid {
 
 #[derive(Component)]
 struct HoverTile;
+
+pub struct GridChanged(pub Vec<(usize, usize)>);
 
 fn setup(
     mut commands: Commands,
@@ -120,7 +124,6 @@ fn setup(
 }
 
 fn update_hover_tile(
-    grid: Res<Grid>,
     selection: Res<Selection>,
     mut hover_tile: Query<(&mut TextModeTextureAtlasSprite, &mut Visibility, &mut Transform), With<HoverTile>>,
     hovered: Query<&Transform, (With<crate::mouse::Hover>, With<GridUI>, Without<HoverTile>)>
@@ -136,6 +139,22 @@ fn update_hover_tile(
             position.translation.x = pos.translation.x;
             position.translation.y = pos.translation.y;
             break;
+        }
+    }
+}
+
+fn update_grid(
+    mut update: EventReader<GridChanged>,
+    grid: Res<Grid>,
+    mut tile: Query<&mut TextModeTextureAtlasSprite>,
+) {
+    for GridChanged(vec) in update.iter() {
+        for &(x, y) in vec.iter() {
+            let Some((t, e)) = grid.tiles.get(&(x, y)) else { continue };
+            let Ok(mut grid_tile) = tile.get_mut(*e) else { continue };
+            grid_tile.bg = t.bg.color();
+            grid_tile.fg = t.fg.color();
+            grid_tile.index = t.index;
         }
     }
 }
