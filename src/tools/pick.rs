@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
+
 use crate::{AppState, mouse, util};
 use crate::loading::Textures;
 
@@ -45,6 +46,7 @@ fn setup(
             w: 16.0,
             h: 16.0,
             id: NAME.to_string(),
+            hover_click: false,
         });
 }
 

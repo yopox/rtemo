@@ -50,6 +50,7 @@ fn setup(
             w: 16.0,
             h: 16.0,
             id: "core/tools/pencil".to_string(),
+            hover_click: false,
         });
 }
 

@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+
 use crate::AppState;
 
 pub struct MousePlugin;
@@ -22,10 +23,14 @@ pub struct Clickable {
     pub w: f32,
     pub h: f32,
     pub id: String,
+    pub hover_click: bool,
 }
 
 #[derive(Component)]
 pub struct Hover;
+
+#[derive(Component)]
+struct AlreadyClicked;
 
 pub struct Clicked(pub String, pub bool);
 
@@ -35,26 +40,36 @@ pub struct Clicked(pub String, pub bool);
 fn update(
     mut commands: Commands,
     mut ev: EventWriter<Clicked>,
-    buttons: Query<(Entity, &Transform, &Clickable)>,
+    buttons: Query<(Entity, &Transform, &Clickable, Option<&AlreadyClicked>)>,
     mouse: Res<Input<MouseButton>>,
     windows: Res<Windows>,
 ) {
-    for (e, _, _) in buttons.iter() {
+    for (e, _, _, _) in buttons.iter() {
         commands.entity(e).remove::<Hover>();
     }
 
-    let clicked_left = mouse.just_pressed(MouseButton::Left);
-    let clicked_right = mouse.just_pressed(MouseButton::Right);
+    let just_clicked_left = mouse.just_pressed(MouseButton::Left);
+    let just_clicked_right = mouse.just_pressed(MouseButton::Right);
+    let clicked_left = mouse.pressed(MouseButton::Left);
+    let released = mouse.just_released(MouseButton::Left);
     let window = windows.get_primary().unwrap();
     if let Some(pos) = window.cursor_position() {
-        for (e, t, c) in buttons.iter() {
+        for (e, t, c, already_clicked) in buttons.iter() {
             let x = t.translation.x + c.w / 2.;
             let y = t.translation.y + c.h / 2.;
             let hover = (pos.x / 4. - x).abs() <= c.w / 2. && (pos.y / 4. - y).abs() <= c.h / 2.;
-            if hover { commands.entity(e).insert(Hover); }
-            if hover && (clicked_left || clicked_right) { ev.send(Clicked(c.id.clone(), clicked_right)); }
+            let mut entity = commands.entity(e);
+            if hover { entity.insert(Hover); }
+            let do_click = hover && (just_clicked_left || just_clicked_right);
+            let do_hover_click = hover && clicked_left && c.hover_click;
+            if already_clicked.is_none() && (do_click || do_hover_click) {
+                ev.send(Clicked(c.id.clone(), just_clicked_right));
+                entity.insert(AlreadyClicked);
+            }
+            if released { entity.remove::<AlreadyClicked>(); }
         }
     }
+
 }
 
 fn cleanup(

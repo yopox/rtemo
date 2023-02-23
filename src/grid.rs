@@ -96,6 +96,7 @@ fn setup(
                     w: 8.,
                     h: 8.,
                     id: format!("{PREFIX}_{x}_{y}"),
+                    hover_click: true,
                 })
                 .insert(GridUI)
                 .id();

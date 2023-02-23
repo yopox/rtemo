@@ -101,6 +101,7 @@ fn setup(
                 w: 8.,
                 h: 8.,
                 id: format!("{PREFIX}{i}"),
+                hover_click: true,
             })
             .insert(QuickTile)
             .insert(QuickTilesUI)
@@ -149,6 +150,7 @@ fn setup(
                 w: 8.,
                 h: 8.,
                 id: format!("{PREFIX_COLOR}{i}"),
+                hover_click: false,
             })
             .insert(ColorButton)
             .insert(QuickTilesUI);
