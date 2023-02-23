@@ -80,7 +80,9 @@ fn setup(
     // Quick tiles
     let mut tiles = Vec::new();
     let dx = 56.;
-    for i in 0..64 {
+    let per_row = util::misc::QUICK_TILES_PER_ROW;
+    let rows = util::misc::QUICK_TILES_ROWS;
+    for i in 0..(per_row * rows) {
         let id = commands
             .spawn(TextModeSpriteSheetBundle {
                 sprite: TextModeTextureAtlasSprite {
@@ -92,7 +94,7 @@ fn setup(
                     ..Default::default()
                 },
                 texture_atlas: textures.mrmotext.clone(),
-                transform: Transform::from_xyz(dx + (i % 32) as f32 * 8., 16. - (i / 32) as f32 * 8., util::z::TOOLBAR_ICONS),
+                transform: Transform::from_xyz(dx + (i % per_row) as f32 * 8., (8. * rows as f32) - (i / per_row) as f32 * 8., util::z::TOOLBAR_ICONS),
                 ..Default::default()
             })
             .insert(Clickable {
@@ -121,7 +123,7 @@ fn setup(
             },
             texture_atlas: textures.mrmotext.clone(),
             transform: Transform {
-                translation: Vec3::new(32., 8., util::z::TOOLBAR),
+                translation: Vec3::new(32., 16., util::z::TOOLBAR),
                 scale: Vec3::new(2., 2., 1.),
                 ..Default::default()
             },
@@ -194,13 +196,17 @@ fn update_range(
     mut tiles: ResMut<QuickTiles>,
     mut changed: EventWriter<QuickTilesChanged>,
 ) {
-    if keys.just_pressed(KeyCode::Up) {
-        tiles.0.iter_mut().for_each(|tile| tile.tile = (tile.tile + util::misc::TILESET_COUNT - 64) % util::misc::TILESET_COUNT);
-        changed.send(QuickTilesChanged);
-    } else if keys.just_pressed(KeyCode::Down) {
-        tiles.0.iter_mut().for_each(|tile| tile.tile = (tile.tile + 64) % util::misc::TILESET_COUNT);
-        changed.send(QuickTilesChanged);
+    let up = keys.just_pressed(KeyCode::Up);
+    let down = keys.just_pressed(KeyCode::Down);
+    if !up && !down { return; }
+
+    let count = util::misc::QUICK_TILES_PER_ROW * util::misc::QUICK_TILES_ROWS;
+    if up {
+        tiles.0.iter_mut().for_each(|tile| tile.tile = (tile.tile + util::misc::TILESET_COUNT - count) % util::misc::TILESET_COUNT);
+    } else {
+        tiles.0.iter_mut().for_each(|tile| tile.tile = (tile.tile + count) % util::misc::TILESET_COUNT);
     }
+    changed.send(QuickTilesChanged);
 }
 
 fn update_tiles_index(

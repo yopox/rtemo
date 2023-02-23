@@ -15,7 +15,7 @@ pub mod size {
     pub const GRID_X: usize = 32;
     pub const GRID_Y: usize = 16;
     pub const LEFT_MARGIN: f32 = 32.;
-    pub const BOTTOM_MARGIN: f32 = 32.;
+    pub const BOTTOM_MARGIN: f32 = 48.;
 }
 
 pub mod z {
@@ -29,6 +29,8 @@ pub mod z {
 pub mod misc {
     pub const DEFAULT_TILE: usize = 1;
     pub const TILESET_COUNT: usize = 1024;
+    pub const QUICK_TILES_ROWS: usize = 4;
+    pub const QUICK_TILES_PER_ROW: usize = 32;
 }
 
 #[derive(EnumIter, Copy, Clone)]

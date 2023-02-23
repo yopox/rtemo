@@ -85,7 +85,7 @@ fn setup(
                     transform: Transform {
                         translation: Vec3::new(
                             -4. + LEFT_MARGIN + (WIDTH - LEFT_MARGIN - 8. * util::size::GRID_X as f32) / 2. + 8. * x as f32,
-                            -4. + HEIGHT - (HEIGHT - 8. * util::size::GRID_Y as f32) / 2. - 8. * y as f32,
+                            -4. + HEIGHT - util::size::BOTTOM_MARGIN / 2. - 8. * y as f32,
                             util::z::GRID
                         ),
                         ..Default::default()
