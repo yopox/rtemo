@@ -28,6 +28,7 @@ pub mod z {
 
 pub mod misc {
     pub const DEFAULT_TILE: usize = 1;
+    pub const TILESET_COUNT: usize = 1024;
 }
 
 #[derive(EnumIter, Copy, Clone)]

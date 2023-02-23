@@ -1,3 +1,5 @@
+use std::slice::SliceIndex;
+
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
 use bevy_text_mode::{TextModeSpriteSheetBundle, TextModeTextureAtlasSprite};
@@ -15,6 +17,7 @@ impl Plugin for QuickTilesPlugin {
         app
             .add_event::<SelectTile>()
             .add_event::<SelectColor>()
+            .add_event::<QuickTilesChanged>()
             .insert_resource(Selection {
                 index: util::misc::DEFAULT_TILE,
                 bg: Palette::Black,
@@ -24,8 +27,10 @@ impl Plugin for QuickTilesPlugin {
             .add_system_set(SystemSet::on_update(AppState::Editor)
                 .with_system(update)
                 .with_system(on_click)
+                .with_system(update_tiles_index)
                 .with_system(update_active_tile)
                 .with_system(update_colors)
+                .with_system(update_range)
             )
             .add_system_set(SystemSet::on_exit(AppState::Editor).with_system(cleanup));
     }
@@ -49,6 +54,8 @@ struct QuickTileId {
 
 #[derive(Resource)]
 struct QuickTiles(Vec<QuickTileId>);
+
+struct QuickTilesChanged;
 
 const PREFIX: &str = "qt_tile_";
 const PREFIX_COLOR: &str = "qt_color_";
@@ -180,6 +187,35 @@ fn on_click(
             select_color.send(SelectColor(n, *right));
         }
     }
+}
+
+fn update_range(
+    keys: Res<Input<KeyCode>>,
+    mut tiles: ResMut<QuickTiles>,
+    mut changed: EventWriter<QuickTilesChanged>,
+) {
+    if keys.just_pressed(KeyCode::Up) {
+        tiles.0.iter_mut().for_each(|tile| tile.tile = (tile.tile + util::misc::TILESET_COUNT - 64) % util::misc::TILESET_COUNT);
+        changed.send(QuickTilesChanged);
+    } else if keys.just_pressed(KeyCode::Down) {
+        tiles.0.iter_mut().for_each(|tile| tile.tile = (tile.tile + 64) % util::misc::TILESET_COUNT);
+        changed.send(QuickTilesChanged);
+    }
+}
+
+fn update_tiles_index(
+    mut tiles_changed: EventReader<QuickTilesChanged>,
+    mut tiles: ResMut<QuickTiles>,
+    mut tile_query: Query<&mut TextModeTextureAtlasSprite, With<QuickTilesUI>>,
+) {
+    for _ in tiles_changed.iter() {
+        for QuickTileId { index, tile, entity } in tiles.0.iter() {
+            let Ok(mut t) = tile_query.get_mut(*entity) else { continue };
+            t.index = *tile;
+        }
+        break
+    }
+    tiles_changed.clear();
 }
 
 fn update_active_tile(
