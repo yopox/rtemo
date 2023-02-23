@@ -5,6 +5,8 @@ use bevy_text_mode::{TextModeSpriteSheetBundle, TextModeTextureAtlasSprite};
 
 use crate::{AppState, HEIGHT, util, WIDTH};
 use crate::loading::Textures;
+use crate::mouse::Clickable;
+use crate::quick_tiles::Selection;
 use crate::util::Palette;
 use crate::util::size::LEFT_MARGIN;
 
@@ -15,11 +17,13 @@ impl Plugin for GridPlugin {
         app
             .add_system_set(SystemSet::on_enter(AppState::Editor).with_system(setup))
             .add_system_set(SystemSet::on_update(AppState::Editor)
-                // .with_system(update)
+                .with_system(update_hover_tile)
             )
             .add_system_set(SystemSet::on_exit(AppState::Editor).with_system(cleanup));
     }
 }
+
+pub const PREFIX: &str = "grid";
 
 #[derive(Component)]
 struct GridUI;
@@ -51,6 +55,9 @@ pub struct Grid {
     pub tiles: HashMap<(usize, usize), (Tile, Entity)>,
 }
 
+#[derive(Component)]
+struct HoverTile;
+
 fn setup(
     mut commands: Commands,
     textures: Res<Textures>,
@@ -66,19 +73,24 @@ fn setup(
                         fg: Color::WHITE,
                         alpha: 1.,
                         index: 0,
-                        anchor: Anchor::Center,
+                        anchor: Anchor::BottomLeft,
                         ..Default::default()
                     },
                     texture_atlas: textures.mrmotext.clone(),
                     transform: Transform {
                         translation: Vec3::new(
-                            LEFT_MARGIN + (WIDTH - LEFT_MARGIN - 8. * util::size::GRID_X as f32) / 2. + 8. * x as f32,
-                             HEIGHT - (HEIGHT - 8. * util::size::GRID_Y as f32) / 2. - 8. * y as f32,
+                            -4. + LEFT_MARGIN + (WIDTH - LEFT_MARGIN - 8. * util::size::GRID_X as f32) / 2. + 8. * x as f32,
+                            -4. + HEIGHT - (HEIGHT - 8. * util::size::GRID_Y as f32) / 2. - 8. * y as f32,
                             util::z::GRID
                         ),
                         ..Default::default()
                     },
                     ..Default::default()
+                })
+                .insert(Clickable {
+                    w: 8.,
+                    h: 8.,
+                    id: format!("{PREFIX}_{x}_{y}"),
                 })
                 .insert(GridUI)
                 .id();
@@ -91,6 +103,41 @@ fn setup(
         h: util::size::GRID_Y,
         tiles,
     });
+
+    // Quick tile
+    commands
+        .spawn(TextModeSpriteSheetBundle {
+            sprite: TextModeTextureAtlasSprite {
+                anchor: Anchor::BottomLeft,
+                ..Default::default()
+            },
+            texture_atlas: textures.mrmotext.clone(),
+            transform: Transform::from_xyz(0., 0., util::z::GRID_HOVER),
+            ..Default::default()
+        })
+        .insert(HoverTile)
+        .insert(GridUI);
+}
+
+fn update_hover_tile(
+    grid: Res<Grid>,
+    selection: Res<Selection>,
+    mut hover_tile: Query<(&mut TextModeTextureAtlasSprite, &mut Visibility, &mut Transform), With<HoverTile>>,
+    hovered: Query<&Transform, (With<crate::mouse::Hover>, With<GridUI>, Without<HoverTile>)>
+) {
+    if let Ok((mut tile, mut visibility, mut position)) = hover_tile.get_single_mut() {
+        tile.index = selection.index;
+        tile.bg = selection.bg.color();
+        tile.fg = selection.fg.color();
+
+        visibility.is_visible = false;
+        for pos in hovered.iter() {
+            visibility.is_visible = true;
+            position.translation.x = pos.translation.x;
+            position.translation.y = pos.translation.y;
+            break;
+        }
+    }
 }
 
 fn cleanup(

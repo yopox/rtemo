@@ -20,9 +20,14 @@ pub mod size {
 
 pub mod z {
     pub const GRID: f32 = 0.;
+    pub const GRID_HOVER: f32 = 0.5;
     pub const TOOLBAR: f32 = 1.;
     pub const TOOLBAR_ICONS_BG: f32 = 1.5;
     pub const TOOLBAR_ICONS: f32 = 2.;
+}
+
+pub mod misc {
+    pub const DEFAULT_TILE: usize = 1;
 }
 
 #[derive(EnumIter)]
@@ -67,7 +72,7 @@ impl Palette {
         }.unwrap()
     }
 
-    pub fn from_usize(n: usize) -> Color {
+    pub fn from_usize(n: usize) -> Palette {
         match n {
             1 => Palette::White,
             2 => Palette::Blue0,
@@ -85,6 +90,6 @@ impl Palette {
             14 => Palette::Yellow,
             15 => Palette::Sand,
             _ => Palette::Black,
-        }.color()
+        }
     }
 }

@@ -6,6 +6,7 @@ use strum::IntoEnumIterator;
 use crate::{AppState, util};
 use crate::loading::Textures;
 use crate::mouse::{Clickable, Clicked, Hover};
+use crate::util::Palette;
 
 pub struct QuickTilesPlugin;
 
@@ -14,6 +15,11 @@ impl Plugin for QuickTilesPlugin {
         app
             .add_event::<SelectTile>()
             .add_event::<SelectColor>()
+            .insert_resource(Selection {
+                index: util::misc::DEFAULT_TILE,
+                bg: Palette::Black,
+                fg: Palette::White,
+            })
             .add_system_set(SystemSet::on_enter(AppState::Editor).with_system(setup))
             .add_system_set(SystemSet::on_update(AppState::Editor)
                 .with_system(update)
@@ -52,6 +58,13 @@ struct ActiveTile;
 
 pub struct SelectTile(pub usize);
 pub struct SelectColor(pub usize, pub bool);
+
+#[derive(Resource)]
+pub struct Selection {
+    pub index: usize,
+    pub bg: Palette,
+    pub fg: Palette,
+}
 
 fn setup(
     mut commands: Commands,
@@ -95,7 +108,7 @@ fn setup(
                 bg: Color::BLACK,
                 fg: Color::WHITE,
                 alpha: 1.,
-                index: 1,
+                index: util::misc::DEFAULT_TILE,
                 anchor: Anchor::BottomLeft,
                 ..Default::default()
             },
@@ -150,16 +163,20 @@ fn on_click(
     mut clicked: EventReader<Clicked>,
     mut select_tile: EventWriter<SelectTile>,
     mut select_color: EventWriter<SelectColor>,
+    mut selection: ResMut<Selection>,
 ) {
     for Clicked(id, right) in clicked.iter() {
         if id.contains(PREFIX) {
             let Some(num) = id.strip_prefix(PREFIX) else { continue };
             let Ok(n) = num.parse::<usize>() else { continue };
             let Some(quick_tile) = quick_tiles.0.iter().find(|tile| tile.index == n) else { continue };
+            selection.index = quick_tile.tile;
             select_tile.send(SelectTile(quick_tile.tile));
         } else if id.contains(PREFIX_COLOR) {
             let Some(num) = id.strip_prefix(PREFIX_COLOR) else { continue };
             let Ok(n) = num.parse::<usize>() else { continue };
+            if *right { selection.bg = Palette::from_usize(n); }
+            else { selection.fg = Palette::from_usize(n); }
             select_color.send(SelectColor(n, *right));
         }
     }
@@ -181,8 +198,8 @@ fn update_colors(
 ) {
     for SelectColor(i, bg) in color.iter() {
         let mut sprite = sprites.single_mut();
-        if *bg { sprite.bg = util::Palette::from_usize(*i); }
-        else { sprite.fg = util::Palette::from_usize(*i); }
+        if *bg { sprite.bg = Palette::from_usize(*i).color(); }
+        else { sprite.fg = Palette::from_usize(*i).color(); }
     }
 }
 
