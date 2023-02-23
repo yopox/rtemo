@@ -1,7 +1,12 @@
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
-use crate::{AppState, mouse, util};
+
+use crate::{AppState, grid, mouse, util};
+use crate::grid::{Grid, GridChanged};
 use crate::loading::Textures;
+use crate::mouse::Clicked;
+use crate::quick_tiles::Selection;
+use crate::toolbar::SelectedTool;
 
 pub(crate) struct EraserPlugin;
 
@@ -48,7 +53,28 @@ fn setup(
         });
 }
 
-fn update() {}
+fn update(
+    tool: Res<SelectedTool>,
+    selection: Res<Selection>,
+    mut clicks: EventReader<Clicked>,
+    mut grid: ResMut<Grid>,
+    mut grid_changed: EventWriter<GridChanged>,
+) {
+    if tool.0 != NAME { clicks.clear(); return; }
+    for Clicked(id, _) in clicks.iter() {
+        if !id.contains(grid::PREFIX) { continue }
+        let s = id.split("_").filter_map(|n| n.parse::<usize>().ok()).collect::<Vec<usize>>();
+        let (Some(&x), Some(&y)) = (s.get(0), s.get(1)) else { continue };
+        let Some((ref mut tile, _)) = grid.tiles.get_mut(&(x, y)) else { continue };
+
+        // Erase tile
+        tile.bg = selection.bg;
+        tile.fg = selection.fg;
+        tile.index = 0;
+
+        grid_changed.send(GridChanged(vec![(x, y)]));
+    }
+}
 
 fn cleanup(
     mut commands: Commands,

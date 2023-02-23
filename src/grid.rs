@@ -7,6 +7,7 @@ use crate::{AppState, HEIGHT, util, WIDTH};
 use crate::loading::Textures;
 use crate::mouse::Clickable;
 use crate::quick_tiles::Selection;
+use crate::toolbar::SelectedTool;
 use crate::util::Palette;
 use crate::util::size::LEFT_MARGIN;
 
@@ -125,11 +126,12 @@ fn setup(
 
 fn update_hover_tile(
     selection: Res<Selection>,
+    tool: Res<SelectedTool>,
     mut hover_tile: Query<(&mut TextModeTextureAtlasSprite, &mut Visibility, &mut Transform), With<HoverTile>>,
     hovered: Query<&Transform, (With<crate::mouse::Hover>, With<GridUI>, Without<HoverTile>)>
 ) {
     if let Ok((mut tile, mut visibility, mut position)) = hover_tile.get_single_mut() {
-        tile.index = selection.index;
+        tile.index = if tool.0.contains(crate::tools::ERASER_TOOL) { 0 } else { selection.index };
         tile.bg = selection.bg.color();
         tile.fg = selection.fg.color();
 
