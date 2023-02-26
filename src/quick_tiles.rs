@@ -64,7 +64,7 @@ const PREFIX_COLOR: &str = "qt_color_";
 struct ActiveTile;
 
 pub struct SelectTile(pub usize);
-pub struct SelectColor(pub usize, pub bool);
+pub struct SelectColor(pub Palette, pub bool);
 
 #[derive(Resource)]
 pub struct Selection {
@@ -186,9 +186,10 @@ fn on_click(
         } else if id.contains(PREFIX_COLOR) {
             let Some(num) = id.strip_prefix(PREFIX_COLOR) else { continue };
             let Ok(n) = num.parse::<usize>() else { continue };
-            if *right { selection.bg = Palette::from_usize(n); }
-            else { selection.fg = Palette::from_usize(n); }
-            select_color.send(SelectColor(n, *right));
+            let color = Palette::from_usize(n);
+            if *right { selection.bg = color; }
+            else { selection.fg = color; }
+            select_color.send(SelectColor(color, *right));
         }
     }
 }
@@ -240,10 +241,10 @@ fn update_colors(
     mut color: EventReader<SelectColor>,
     mut sprites: Query<&mut TextModeTextureAtlasSprite, With<ActiveTile>>,
 ) {
-    for SelectColor(i, bg) in color.iter() {
+    for SelectColor(p, bg) in color.iter() {
         let mut sprite = sprites.single_mut();
-        if *bg { sprite.bg = Palette::from_usize(*i).color(); }
-        else { sprite.fg = Palette::from_usize(*i).color(); }
+        if *bg { sprite.bg = p.color(); }
+        else { sprite.fg = p.color(); }
     }
 }
 

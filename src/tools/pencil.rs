@@ -5,7 +5,7 @@ use crate::{AppState, grid, mouse, util};
 use crate::grid::{Grid, GridChanged};
 use crate::loading::Textures;
 use crate::mouse::Clicked;
-use crate::quick_tiles::Selection;
+use crate::quick_tiles::{SelectColor, Selection, SelectTile};
 use crate::toolbar::SelectedTool;
 
 pub(crate) struct PencilPlugin;
@@ -56,8 +56,11 @@ fn setup(
 
 fn update(
     tool: Res<SelectedTool>,
+    keys: Res<Input<KeyCode>>,
     mut selection: ResMut<Selection>,
     mut clicks: EventReader<Clicked>,
+    mut ev_tile: EventWriter<SelectTile>,
+    mut ev_color: EventWriter<SelectColor>,
     mut grid: ResMut<Grid>,
     mut grid_changed: EventWriter<GridChanged>,
 ) {
@@ -71,13 +74,18 @@ fn update(
         if *right_button {
             // Tile info -> Selection
             selection.bg = tile.bg;
+            ev_color.send(SelectColor(tile.bg, true));
             selection.fg = tile.fg;
-            selection.index = tile.index;
+            ev_color.send(SelectColor(tile.fg, false));
+            if !keys.pressed(KeyCode::LShift) {
+                selection.index = tile.index;
+                ev_tile.send(SelectTile(tile.index));
+            }
         } else {
             // Selection -> Tile info
             tile.bg = selection.bg;
             tile.fg = selection.fg;
-            tile.index = selection.index;
+            if !keys.pressed(KeyCode::LShift) { tile.index = selection.index; }
 
             grid_changed.send(GridChanged(vec![(x, y)]));
         }

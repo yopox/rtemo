@@ -15,7 +15,7 @@ pub mod size {
     pub const GRID_X: usize = 32;
     pub const GRID_Y: usize = 16;
     pub const LEFT_MARGIN: f32 = 32.;
-    pub const BOTTOM_MARGIN: f32 = 48.;
+    pub const BOTTOM_MARGIN: f32 = 40.;
 }
 
 pub mod z {

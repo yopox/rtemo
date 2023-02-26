@@ -85,7 +85,7 @@ fn setup(
                     transform: Transform {
                         translation: Vec3::new(
                             -4. + LEFT_MARGIN + (WIDTH - LEFT_MARGIN - 8. * util::size::GRID_X as f32) / 2. + 8. * x as f32,
-                            -4. + HEIGHT - util::size::BOTTOM_MARGIN / 2. - 8. * y as f32,
+                            -8. + HEIGHT - (HEIGHT - 8. * util::size::GRID_Y as f32 - util::size::BOTTOM_MARGIN) / 2. - 8. * y as f32,
                             util::z::GRID
                         ),
                         ..Default::default()
@@ -110,7 +110,7 @@ fn setup(
         tiles,
     });
 
-    // Quick tile
+    // Hover tile
     commands
         .spawn(TextModeSpriteSheetBundle {
             sprite: TextModeTextureAtlasSprite {
@@ -128,6 +128,7 @@ fn setup(
 fn update_hover_tile(
     selection: Res<Selection>,
     tool: Res<SelectedTool>,
+    keys: Res<Input<KeyCode>>,
     mut hover_tile: Query<(&mut TextModeTextureAtlasSprite, &mut Visibility, &mut Transform), With<HoverTile>>,
     hovered: Query<&Transform, (With<crate::mouse::Hover>, With<GridUI>, Without<HoverTile>)>
 ) {
@@ -137,11 +138,13 @@ fn update_hover_tile(
         tile.fg = selection.fg.color();
 
         visibility.is_visible = false;
-        for pos in hovered.iter() {
-            visibility.is_visible = true;
-            position.translation.x = pos.translation.x;
-            position.translation.y = pos.translation.y;
-            break;
+        if !keys.pressed(KeyCode::LShift) {
+            for pos in hovered.iter() {
+                visibility.is_visible = true;
+                position.translation.x = pos.translation.x;
+                position.translation.y = pos.translation.y;
+                break;
+            }
         }
     }
 }
