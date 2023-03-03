@@ -1,4 +1,4 @@
-use bevy::prelude::Color;
+use bevy::prelude::{Color, KeyCode};
 use strum_macros::EnumIter;
 
 use crate::grid;
@@ -14,8 +14,8 @@ pub mod tool_priority {
 
 pub mod size {
     pub const ICON: f32 = 16.;
-    pub const GRID_X: usize = 32;
-    pub const GRID_Y: usize = 16;
+    pub const GRID_X: usize = 12;
+    pub const GRID_Y: usize = 12;
     pub const LEFT_MARGIN: f32 = 32.;
     pub const BOTTOM_MARGIN: f32 = 40.;
 }
@@ -111,4 +111,48 @@ pub fn get_grid_x_y(id: &str) -> Option<(usize, usize)> {
         (Some(&x), Some(&y)) => Some((x, y)),
         _ => None,
     }
+}
+
+pub fn get_char(code: &KeyCode) -> Option<char> {
+    match code {
+        KeyCode::A => Some('a'),
+        KeyCode::B => Some('b'),
+        KeyCode::C => Some('c'),
+        KeyCode::D => Some('d'),
+        KeyCode::E => Some('e'),
+        KeyCode::F => Some('f'),
+        KeyCode::G => Some('g'),
+        KeyCode::H => Some('h'),
+        KeyCode::I => Some('i'),
+        KeyCode::J => Some('j'),
+        KeyCode::K => Some('k'),
+        KeyCode::L => Some('l'),
+        KeyCode::M => Some('m'),
+        KeyCode::N => Some('n'),
+        KeyCode::O => Some('o'),
+        KeyCode::P => Some('p'),
+        KeyCode::Q => Some('q'),
+        KeyCode::R => Some('r'),
+        KeyCode::S => Some('s'),
+        KeyCode::T => Some('t'),
+        KeyCode::U => Some('u'),
+        KeyCode::V => Some('v'),
+        KeyCode::W => Some('w'),
+        KeyCode::X => Some('x'),
+        KeyCode::Y => Some('y'),
+        KeyCode::Z => Some('z'),
+        KeyCode::Space => Some(' '),
+        _ => None,
+    }
+}
+
+pub fn char_to_tile(c: char) -> Option<usize> {
+    let start = b'!' as usize;
+    let start_index: usize = 865;
+
+    let input = c.to_ascii_uppercase() as usize;
+    if input < start { return None }
+    let result = input - start + start_index;
+
+    return Some(result)
 }

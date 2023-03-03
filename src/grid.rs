@@ -51,6 +51,9 @@ impl Default for Tile {
     }
 }
 
+#[derive(Component)]
+pub struct TilePos(pub (usize, usize));
+
 #[derive(Resource)]
 pub struct Grid {
     pub w: usize,
@@ -61,7 +64,18 @@ pub struct Grid {
 #[derive(Component)]
 struct HoverTile;
 
+#[derive(Resource)]
+pub struct HoverTileIndexOverride {
+    pub index: usize,
+    pub visible: bool,
+    pub force_x: Option<usize>,
+    pub force_y: Option<usize>,
+}
+
 pub struct GridChanged(pub Vec<(usize, usize)>);
+
+fn grid_x(x: usize) -> f32 { return -4. + LEFT_MARGIN + (WIDTH - LEFT_MARGIN - 8. * util::size::GRID_X as f32) / 2. + 8. * x as f32 }
+fn grid_y(y: usize) -> f32 { return -8. + HEIGHT - (HEIGHT - 8. * util::size::GRID_Y as f32 - util::size::BOTTOM_MARGIN) / 2. - 8. * y as f32 }
 
 fn setup(
     mut commands: Commands,
@@ -84,8 +98,8 @@ fn setup(
                     texture_atlas: textures.mrmotext.clone(),
                     transform: Transform {
                         translation: Vec3::new(
-                            -4. + LEFT_MARGIN + (WIDTH - LEFT_MARGIN - 8. * util::size::GRID_X as f32) / 2. + 8. * x as f32,
-                            -8. + HEIGHT - (HEIGHT - 8. * util::size::GRID_Y as f32 - util::size::BOTTOM_MARGIN) / 2. - 8. * y as f32,
+                            grid_x(x),
+                            grid_y(y),
                             util::z::GRID
                         ),
                         ..Default::default()
@@ -98,6 +112,7 @@ fn setup(
                     id: format!("{PREFIX}_{x}_{y}"),
                     hover_click: true,
                 })
+                // .insert(TilePos((x, y)))
                 .insert(GridUI)
                 .id();
             tiles.insert((x, y), (Tile::default(), id));
@@ -129,22 +144,41 @@ fn update_hover_tile(
     selection: Res<Selection>,
     tool: Res<SelectedTool>,
     keys: Res<Input<KeyCode>>,
+    index_override: Option<Res<HoverTileIndexOverride>>,
     mut hover_tile: Query<(&mut TextModeTextureAtlasSprite, &mut Visibility, &mut Transform), With<HoverTile>>,
     hovered: Query<&Transform, (With<crate::mouse::Hover>, With<GridUI>, Without<HoverTile>)>
 ) {
     if let Ok((mut tile, mut visibility, mut position)) = hover_tile.get_single_mut() {
-        tile.index = if tool.0.contains(crate::tools::ERASER_TOOL) { 0 } else { selection.index };
+        let mut new_vis = true;
+        let mut force_x = None;
+        let mut force_y = None;
+
+        if let Some(index) = index_override {
+            tile.index = index.index;
+            new_vis = index.visible;
+            force_x = index.force_x;
+            force_y = index.force_y;
+        } else {
+            tile.index = if tool.0.contains(crate::tools::ERASER_TOOL) { 0 } else { selection.index };
+        }
+
         tile.bg = selection.bg.color();
         tile.fg = selection.fg.color();
 
         visibility.is_visible = false;
         if !keys.pressed(KeyCode::LShift) {
             for pos in hovered.iter() {
-                visibility.is_visible = true;
+                visibility.is_visible = new_vis;
                 position.translation.x = pos.translation.x;
                 position.translation.y = pos.translation.y;
                 break;
             }
+        }
+
+        if let (Some(x), Some(y)) = (force_x, force_y) {
+            visibility.is_visible = new_vis;
+            position.translation.x = grid_x(x);
+            position.translation.y = grid_y(y);
         }
     }
 }
