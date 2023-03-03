@@ -1,6 +1,8 @@
 use bevy::prelude::Color;
 use strum_macros::EnumIter;
 
+use crate::grid;
+
 pub mod tool_priority {
     pub const PENCIL: u16 = 0;
     pub const FILL: u16 = 10;
@@ -94,5 +96,19 @@ impl Palette {
             15 => Palette::Sand,
             _ => Palette::Black,
         }
+    }
+}
+
+pub fn get_grid_x_y(id: &str) -> Option<(usize, usize)> {
+    if !id.contains(grid::PREFIX) { return None; }
+
+    let pos = id
+        .split("_")
+        .filter_map(|n| n.parse::<usize>().ok())
+        .collect::<Vec<usize>>();
+
+    return match (pos.get(0), pos.get(1)) {
+        (Some(&x), Some(&y)) => Some((x, y)),
+        _ => None,
     }
 }

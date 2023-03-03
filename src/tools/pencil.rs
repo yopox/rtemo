@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
 
-use crate::{AppState, grid, mouse, util};
+use crate::{AppState, mouse, util};
 use crate::grid::{Grid, GridChanged};
 use crate::loading::Textures;
 use crate::mouse::Clicked;
@@ -66,9 +66,7 @@ fn update(
 ) {
     if tool.0 != NAME { clicks.clear(); return; }
     for Clicked(id, right_button) in clicks.iter() {
-        if !id.contains(grid::PREFIX) { continue }
-        let s = id.split("_").filter_map(|n| n.parse::<usize>().ok()).collect::<Vec<usize>>();
-        let (Some(&x), Some(&y)) = (s.get(0), s.get(1)) else { continue };
+        let Some((x, y)) = util::get_grid_x_y(id) else { continue };
         let Some((ref mut tile, _)) = grid.tiles.get_mut(&(x, y)) else { continue };
 
         if *right_button {
