@@ -8,10 +8,8 @@ impl Plugin for MousePlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<Clicked>()
-            .add_system_set(SystemSet::on_update(AppState::Editor)
-                .with_system(update)
-            )
-            .add_system_set(SystemSet::on_exit(AppState::Editor).with_system(cleanup));
+            .add_system(update.in_set(OnUpdate(AppState::Editor)))
+            .add_system(cleanup.in_schedule(OnExit(AppState::Editor)));
     }
 }
 
@@ -42,7 +40,7 @@ fn update(
     mut ev: EventWriter<Clicked>,
     buttons: Query<(Entity, &Transform, &Clickable, Option<&AlreadyClicked>)>,
     mouse: Res<Input<MouseButton>>,
-    windows: Res<Windows>,
+    mut windows: Query<&mut Window>,
 ) {
     for (e, _, _, _) in buttons.iter() {
         commands.entity(e).remove::<Hover>();
@@ -52,7 +50,7 @@ fn update(
     let just_clicked_right = mouse.just_pressed(MouseButton::Right);
     let clicked_left = mouse.pressed(MouseButton::Left);
     let released = mouse.just_released(MouseButton::Left);
-    let window = windows.get_primary().unwrap();
+    let window = windows.get_single().unwrap();
     if let Some(pos) = window.cursor_position() {
         for (e, t, c, already_clicked) in buttons.iter() {
             let x = t.translation.x + c.w / 2.;

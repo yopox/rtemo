@@ -23,16 +23,14 @@ impl Plugin for QuickTilesPlugin {
                 bg: Palette::Black,
                 fg: Palette::White,
             })
-            .add_system_set(SystemSet::on_enter(AppState::Editor).with_system(setup))
-            .add_system_set(SystemSet::on_update(AppState::Editor)
-                .with_system(update)
-                .with_system(on_click)
-                .with_system(update_tiles_index)
-                .with_system(update_active_tile)
-                .with_system(update_colors)
-                .with_system(update_range)
+            .add_system(setup.in_schedule(OnEnter(AppState::Editor)))
+            .add_systems(
+                (update, on_click,
+                 update_tiles_index, update_active_tile,
+                 update_colors, update_range)
+                    .in_set(OnUpdate(AppState::Editor))
             )
-            .add_system_set(SystemSet::on_exit(AppState::Editor).with_system(cleanup));
+            .add_system(cleanup.in_schedule(OnExit(AppState::Editor)));
     }
 }
 

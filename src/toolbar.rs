@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
-use crate::{AppState, HEIGHT, tools, util, WIDTH};
+
+use crate::{AppState, HEIGHT, tools, util};
 use crate::loading::Textures;
 use crate::mouse::{Clicked, Hover};
 
@@ -12,13 +13,12 @@ impl Plugin for ToolbarPlugin {
             .insert_resource(SelectedTool(tools::PENCIL_TOOL.to_string()))
             .insert_resource(ToolbarItems(vec![]))
             .add_event::<UpdateToolbar>()
-            .add_system_set(SystemSet::on_enter(AppState::Editor).with_system(setup))
-            .add_system_set(SystemSet::on_update(AppState::Editor)
-                .with_system(update_gui)
-                .with_system(update_toolbar)
-                .with_system(on_click)
+            .add_system(setup.in_schedule(OnEnter(AppState::Editor)))
+            .add_systems(
+                (update_gui, update_toolbar, on_click)
+                    .in_set(OnUpdate(AppState::Editor))
             )
-            .add_system_set(SystemSet::on_exit(AppState::Editor).with_system(cleanup));
+            .add_system(cleanup.in_schedule(OnExit(AppState::Editor)));
     }
 }
 
@@ -98,7 +98,7 @@ fn setup(
             },
             texture_atlas: textures.icons.clone(),
             transform: Transform::from_xyz(0., 0., util::z::TOOLBAR_ICONS_BG),
-            visibility: Visibility { is_visible: false },
+            visibility: Visibility::Hidden,
             ..Default::default()
         })
         .insert(HoveredBg)
@@ -131,11 +131,11 @@ fn update_gui(
     let mut t1 = selected.get_single_mut().unwrap();
     let (mut t2, mut v2) = hovered.get_single_mut().unwrap();
 
-    v2.is_visible = false;
+    v2.set_if_neq(Visibility::Hidden);
 
     for (tool, t, h) in tools.iter() {
         if h.is_some() {
-            v2.is_visible = true;
+            v2.set_if_neq(Visibility::Inherited);
             t2.translation.x = t.translation.x;
             t2.translation.y = t.translation.y;
         }

@@ -156,3 +156,8 @@ pub fn char_to_tile(c: char) -> Option<usize> {
 
     return Some(result)
 }
+
+#[test]
+fn test() {
+
+}

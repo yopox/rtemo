@@ -13,9 +13,9 @@ pub(crate) struct PencilPlugin;
 impl Plugin for PencilPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_system_set(SystemSet::on_enter(AppState::Editor).with_system(setup))
-            .add_system_set(SystemSet::on_update(AppState::Editor).with_system(update))
-            .add_system_set(SystemSet::on_exit(AppState::Editor).with_system(cleanup));
+            .add_system(setup.in_schedule(OnEnter(AppState::Editor)))
+            .add_system(update.in_set(OnUpdate(AppState::Editor)))
+            .add_system(cleanup.in_schedule(OnExit(AppState::Editor)));
     }
 }
 

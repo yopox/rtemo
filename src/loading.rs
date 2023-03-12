@@ -1,16 +1,18 @@
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
+
 use crate::AppState;
 
 pub struct LoadingPlugin;
 
 impl Plugin for LoadingPlugin {
     fn build(&self, app: &mut App) {
-        app.add_loading_state(
-            LoadingState::new(AppState::Loading)
-                .with_collection::<Textures>()
-                .continue_to_state(AppState::Editor),
-        );
+        app
+            .add_loading_state(
+                LoadingState::new(AppState::Loading)
+                    .continue_to_state(AppState::Editor),
+            )
+            .add_collection_to_loading_state::<_, Textures>(AppState::Loading);
     }
 }
 

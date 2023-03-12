@@ -15,8 +15,9 @@ mod mouse;
 mod quick_tiles;
 mod grid;
 
-#[derive(Clone, Eq, PartialEq, Debug, Hash)]
+#[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 enum AppState {
+    #[default]
     Loading,
     Editor,
 }
@@ -27,21 +28,19 @@ const HEIGHT: f32 = 8. * 25.;
 fn main() {
     App::new()
         .insert_resource(ClearColor(Color::hex("30303a").unwrap()))
-        .insert_resource(Msaa { samples: 1 })
         .add_plugins(DefaultPlugins
             .set(ImagePlugin::default_nearest())
             .set(WindowPlugin {
-                window: WindowDescriptor {
-                    width: WIDTH * 4.,
-                    height: HEIGHT * 4.,
+                primary_window: Some(Window {
+                    resolution: (WIDTH * 4., HEIGHT * 4.).into(),
                     title: "rtemo".to_string(),
                     canvas: Some("#bevy".to_owned()),
-                    ..Default::default()
-                },
+                    ..default()
+                }),
                 ..default()
             })
         )
-        .add_state(AppState::Loading)
+        .add_state::<AppState>()
         .add_plugin(LoadingPlugin)
         .add_plugin(GridPlugin)
         .add_plugin(ToolbarPlugin)

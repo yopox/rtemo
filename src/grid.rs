@@ -17,12 +17,12 @@ impl Plugin for GridPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<GridChanged>()
-            .add_system_set(SystemSet::on_enter(AppState::Editor).with_system(setup))
-            .add_system_set(SystemSet::on_update(AppState::Editor)
-                .with_system(update_hover_tile)
-                .with_system(update_grid)
+            .add_system(setup.in_schedule(OnEnter(AppState::Editor)))
+            .add_systems(
+                (update_hover_tile, update_grid)
+                .in_set(OnUpdate(AppState::Editor))
             )
-            .add_system_set(SystemSet::on_exit(AppState::Editor).with_system(cleanup));
+            .add_system(cleanup.in_schedule(OnExit(AppState::Editor)));
     }
 }
 
@@ -67,7 +67,7 @@ struct HoverTile;
 #[derive(Resource)]
 pub struct HoverTileIndexOverride {
     pub index: usize,
-    pub visible: bool,
+    pub visible: Visibility,
     pub force_x: Option<usize>,
     pub force_y: Option<usize>,
 }
@@ -149,7 +149,7 @@ fn update_hover_tile(
     hovered: Query<&Transform, (With<crate::mouse::Hover>, With<GridUI>, Without<HoverTile>)>
 ) {
     if let Ok((mut tile, mut visibility, mut position)) = hover_tile.get_single_mut() {
-        let mut new_vis = true;
+        let mut new_vis = Visibility::Inherited;
         let mut force_x = None;
         let mut force_y = None;
 
@@ -165,10 +165,10 @@ fn update_hover_tile(
         tile.bg = selection.bg.color();
         tile.fg = selection.fg.color();
 
-        visibility.is_visible = false;
+        visibility.set_if_neq(Visibility::Hidden);
         if !keys.pressed(KeyCode::LShift) {
             for pos in hovered.iter() {
-                visibility.is_visible = new_vis;
+                visibility.set_if_neq(new_vis);
                 position.translation.x = pos.translation.x;
                 position.translation.y = pos.translation.y;
                 break;
@@ -176,7 +176,7 @@ fn update_hover_tile(
         }
 
         if let (Some(x), Some(y)) = (force_x, force_y) {
-            visibility.is_visible = new_vis;
+            visibility.set_if_neq(new_vis);
             position.translation.x = grid_x(x);
             position.translation.y = grid_y(y);
         }

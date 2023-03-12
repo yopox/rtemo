@@ -13,13 +13,10 @@ pub(crate) struct TextPlugin;
 impl Plugin for TextPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_system_set(SystemSet::on_enter(AppState::Editor).with_system(setup))
-            .add_system_set(SystemSet::on_update(AppState::Editor)
-                .with_system(update)
-                .with_system(on_click)
-                .with_system(on_type)
-            )
-            .add_system_set(SystemSet::on_exit(AppState::Editor).with_system(cleanup));
+            .add_system(setup.in_schedule(OnEnter(AppState::Editor)))
+            .add_systems((update, on_click, on_type).in_set(OnUpdate(AppState::Editor)))
+            .add_system(cleanup.in_schedule(OnExit(AppState::Editor)));
+
     }
 }
 
@@ -78,7 +75,7 @@ fn update(
         if selected.0 == NAME {
             commands.insert_resource(HoverTileIndexOverride {
                 index: 927,
-                visible: true,
+                visible: Visibility::Inherited,
                 force_x: None,
                 force_y: None,
             });
@@ -91,7 +88,7 @@ fn update(
         state.frame += 1;
         state.frame = state.frame % 60;
         if let Some(mut cursor) = cursor {
-            cursor.visible = state.frame < 30;
+            cursor.visible = if state.frame < 30 { Visibility::Inherited } else { Visibility::Hidden };
         }
     }
 }
