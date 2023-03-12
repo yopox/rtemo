@@ -20,7 +20,7 @@ codegen-units = 1
 bevy = { version = "0.10.0", default-features = false, features = ["bevy_asset", "bevy_winit", "png", "x11"] }
 bevy_asset_loader = { version = "0.15.0", default-features = false, features = ["2d"] }
 bevy_common_assets = { version = "0.5.0", features = ["ron"] }
-bevy_text_mode = { path = "../bevy_text_mode" }
+bevy_text_mode = { version = "0.1.0" }
 strum = "0.24.1"
 strum_macros = "0.24.3"
 
