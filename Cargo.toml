@@ -19,8 +19,8 @@ codegen-units = 1
 [dependencies]
 bevy = { version = "0.10.0", default-features = false, features = ["bevy_asset", "bevy_winit", "png", "x11"] }
 bevy_asset_loader = { version = "0.15.0", default-features = false, features = ["2d"] }
-bevy_common_assets = { version = "0.5.0", features = ["ron"] }
-bevy_text_mode = { version = "0.1.0" }
+bevy_common_assets = { version = "0.6.0", features = ["ron"] }
+bevy_text_mode = "0.1.0"
 strum = "0.24.1"
 strum_macros = "0.24.3"
 
@@ -30,6 +30,3 @@ serde = { version = "1.0.147" }
 
 winit = { version = "0.28.2", default-features = false }
 image = { version = "0.24", default-features = false }
-
-[build-dependencies]
-embed-resource = "1.4"
