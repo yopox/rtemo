@@ -4,9 +4,10 @@ use bevy::sprite::Anchor;
 use crate::{AppState, mouse, util};
 use crate::grid::{Grid, GridChanged, HoverTileIndexOverride};
 use crate::loading::Textures;
-use crate::mouse::Clicked;
+use crate::mouse::{ButtonId, Clicked};
 use crate::quick_tiles::Selection;
 use crate::toolbar::{SelectedTool, UpdateToolbar};
+use crate::tools::Tools;
 
 pub(crate) struct TextPlugin;
 
@@ -32,8 +33,6 @@ struct TextCursorState {
     frame: usize,
 }
 
-pub const NAME: &str = "core/tools/text";
-
 fn setup(
     mut commands: Commands,
     textures: Res<Textures>,
@@ -52,14 +51,14 @@ fn setup(
             }
         ))
         .insert(crate::toolbar::Tool {
-            name: NAME.to_string(),
+            id: Tools::Text,
             shortcut: 't',
             priority: util::tool_priority::TEXT,
         })
         .insert(mouse::Clickable {
             w: 16.0,
             h: 16.0,
-            id: NAME.to_string(),
+            id: ButtonId::Tool(Tools::Text),
             hover_click: false,
         });
 }
@@ -72,7 +71,7 @@ fn update(
     selected: Res<SelectedTool>,
 ) {
     for UpdateToolbar in ev.iter() {
-        if selected.0 == NAME {
+        if selected.0 == Tools::Text {
             commands.insert_resource(HoverTileIndexOverride {
                 index: 927,
                 visible: Visibility::Inherited,
@@ -81,6 +80,7 @@ fn update(
             });
         } else {
             commands.remove_resource::<HoverTileIndexOverride>();
+            commands.remove_resource::<TextCursorState>();
         }
     }
 
@@ -99,21 +99,21 @@ fn on_click(
     mut clicks: EventReader<Clicked>,
     mut hover_override: Option<ResMut<HoverTileIndexOverride>>,
 ) {
-    if tool.0 != NAME { clicks.clear(); return; }
+    if tool.0 != Tools::Text { clicks.clear(); return; }
     for Clicked(id, _) in clicks.iter() {
-        let Some((x, y)) = util::get_grid_x_y(id) else { continue };
+        if let ButtonId::Grid(x, y) = id {
+            commands.insert_resource(TextCursorState {
+                start_x: *x,
+                start_y: *y,
+                current_x: *x,
+                current_y: *y,
+                frame: 0,
+            });
 
-        commands.insert_resource(TextCursorState {
-            start_x: x,
-            start_y: y,
-            current_x: x,
-            current_y: y,
-            frame: 0,
-        });
-
-        if let Some(ref mut hover_override) = hover_override {
-            hover_override.force_x = Some(x);
-            hover_override.force_y = Some(y);
+            if let Some(ref mut hover_override) = hover_override {
+                hover_override.force_x = Some(*x);
+                hover_override.force_y = Some(*y);
+            }
         }
     }
 }

@@ -10,6 +10,7 @@ pub mod tool_priority {
     pub const SELECT: u16 = 30;
     pub const PICK: u16 = 40;
     pub const TEXT: u16 = 50;
+    pub const RESIZE: u16 = 60;
 }
 
 pub mod size {
@@ -75,41 +76,6 @@ impl Palette {
             Palette::Yellow => Color::hex("f6d42d"),
             Palette::Sand => Color::hex("e5ca9f"),
         }.unwrap()
-    }
-
-    pub fn from_usize(n: usize) -> Palette {
-        match n {
-            1 => Palette::White,
-            2 => Palette::Blue0,
-            3 => Palette::Blue1,
-            4 => Palette::Blue2,
-            5 => Palette::Blue3,
-            6 => Palette::Green0,
-            7 => Palette::Green1,
-            8 => Palette::Red0,
-            9 => Palette::Red1,
-            10 => Palette::Orange0,
-            11 => Palette::Orange1,
-            12 => Palette::Pink,
-            13 => Palette::Beige,
-            14 => Palette::Yellow,
-            15 => Palette::Sand,
-            _ => Palette::Black,
-        }
-    }
-}
-
-pub fn get_grid_x_y(id: &str) -> Option<(usize, usize)> {
-    if !id.contains(grid::PREFIX) { return None; }
-
-    let pos = id
-        .split("_")
-        .filter_map(|n| n.parse::<usize>().ok())
-        .collect::<Vec<usize>>();
-
-    return match (pos.get(0), pos.get(1)) {
-        (Some(&x), Some(&y)) => Some((x, y)),
-        _ => None,
     }
 }
 

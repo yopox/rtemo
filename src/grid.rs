@@ -5,9 +5,10 @@ use bevy_text_mode::{TextModeSpriteSheetBundle, TextModeTextureAtlasSprite};
 
 use crate::{AppState, HEIGHT, util, WIDTH};
 use crate::loading::Textures;
-use crate::mouse::Clickable;
+use crate::mouse::{ButtonId, Clickable};
 use crate::quick_tiles::Selection;
 use crate::toolbar::SelectedTool;
+use crate::tools::Tools;
 use crate::util::Palette;
 use crate::util::size::LEFT_MARGIN;
 
@@ -25,8 +26,6 @@ impl Plugin for GridPlugin {
             .add_system(cleanup.in_schedule(OnExit(AppState::Editor)));
     }
 }
-
-pub const PREFIX: &str = "grid";
 
 #[derive(Component)]
 struct GridUI;
@@ -109,7 +108,7 @@ fn setup(
                 .insert(Clickable {
                     w: 8.,
                     h: 8.,
-                    id: format!("{PREFIX}_{x}_{y}"),
+                    id: ButtonId::Grid(x, y),
                     hover_click: true,
                 })
                 // .insert(TilePos((x, y)))
@@ -159,7 +158,7 @@ fn update_hover_tile(
             force_x = index.force_x;
             force_y = index.force_y;
         } else {
-            tile.index = if tool.0.contains(crate::tools::ERASER_TOOL) { 0 } else { selection.index };
+            tile.index = if tool.0 == Tools::Eraser { 0 } else { selection.index };
         }
 
         tile.bg = selection.bg.color();

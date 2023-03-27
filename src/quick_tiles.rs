@@ -7,7 +7,7 @@ use strum::IntoEnumIterator;
 
 use crate::{AppState, util};
 use crate::loading::Textures;
-use crate::mouse::{Clickable, Clicked, Hover};
+use crate::mouse::{ButtonId, Clickable, Clicked, Hover};
 use crate::util::Palette;
 
 pub struct QuickTilesPlugin;
@@ -55,9 +55,6 @@ struct QuickTiles(Vec<QuickTileId>);
 
 struct QuickTilesChanged;
 
-const PREFIX: &str = "qt_tile_";
-const PREFIX_COLOR: &str = "qt_color_";
-
 #[derive(Component)]
 struct ActiveTile;
 
@@ -98,7 +95,7 @@ fn setup(
             .insert(Clickable {
                 w: 8.,
                 h: 8.,
-                id: format!("{PREFIX}{i}"),
+                id: ButtonId::QuickTile(i),
                 hover_click: true,
             })
             .insert(QuickTile)
@@ -147,7 +144,7 @@ fn setup(
             .insert(Clickable {
                 w: 8.,
                 h: 8.,
-                id: format!("{PREFIX_COLOR}{i}"),
+                id: ButtonId::QuickColor(color),
                 hover_click: false,
             })
             .insert(ColorButton)
@@ -175,19 +172,18 @@ fn on_click(
     mut selection: ResMut<Selection>,
 ) {
     for Clicked(id, right) in clicked.iter() {
-        if id.contains(PREFIX) {
-            let Some(num) = id.strip_prefix(PREFIX) else { continue };
-            let Ok(n) = num.parse::<usize>() else { continue };
-            let Some(quick_tile) = quick_tiles.0.iter().find(|tile| tile.index == n) else { continue };
-            selection.index = quick_tile.tile;
-            select_tile.send(SelectTile(quick_tile.tile));
-        } else if id.contains(PREFIX_COLOR) {
-            let Some(num) = id.strip_prefix(PREFIX_COLOR) else { continue };
-            let Ok(n) = num.parse::<usize>() else { continue };
-            let color = Palette::from_usize(n);
-            if *right { selection.bg = color; }
-            else { selection.fg = color; }
-            select_color.send(SelectColor(color, *right));
+        match id {
+            ButtonId::QuickTile(n) => {
+                let Some(quick_tile) = quick_tiles.0.iter().find(|tile| tile.index == *n) else { continue };
+                selection.index = quick_tile.tile;
+                select_tile.send(SelectTile(quick_tile.tile));
+            }
+            ButtonId::QuickColor(color) => {
+                if *right { selection.bg = *color; }
+                else { selection.fg = *color; }
+                select_color.send(SelectColor(*color, *right));
+            }
+            _ => ()
         }
     }
 }

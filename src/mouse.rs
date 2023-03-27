@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 
 use crate::AppState;
+use crate::tools::Tools;
+use crate::util::Palette;
 
 pub struct MousePlugin;
 
@@ -16,11 +18,20 @@ impl Plugin for MousePlugin {
 #[derive(Component)]
 struct MouseUI;
 
+#[derive(Copy, Clone)]
+pub enum ButtonId {
+    Tool(Tools),
+    Grid(usize, usize),
+    QuickTile(usize),
+    QuickColor(Palette),
+    Custom(&'static str),
+}
+
 #[derive(Component)]
 pub struct Clickable {
     pub w: f32,
     pub h: f32,
-    pub id: String,
+    pub id: ButtonId,
     pub hover_click: bool,
 }
 
@@ -30,7 +41,7 @@ pub struct Hover;
 #[derive(Component)]
 struct AlreadyClicked;
 
-pub struct Clicked(pub String, pub bool);
+pub struct Clicked(pub ButtonId, pub bool);
 
 /// Assuming [Clickable]-s have the [bevy::sprite::Anchor::BottomLeft] anchor:
 /// - adds [Hover] component to entities with [Clickable] & [Transform] being hovered

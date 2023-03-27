@@ -4,9 +4,10 @@ use bevy::sprite::Anchor;
 use crate::{AppState, mouse, util};
 use crate::grid::{Grid, GridChanged};
 use crate::loading::Textures;
-use crate::mouse::Clicked;
+use crate::mouse::{ButtonId, Clicked};
 use crate::quick_tiles::{SelectColor, Selection, SelectTile};
 use crate::toolbar::SelectedTool;
+use crate::tools::Tools;
 
 pub(crate) struct PencilPlugin;
 
@@ -21,8 +22,6 @@ impl Plugin for PencilPlugin {
 
 #[derive(Component)]
 struct PencilUI;
-
-pub const NAME: &str = "core/tools/pencil";
 
 fn setup(
     mut commands: Commands,
@@ -42,14 +41,14 @@ fn setup(
             }
         ))
         .insert(crate::toolbar::Tool {
-            name: NAME.to_string(),
+            id: Tools::Pencil,
             shortcut: 'p',
             priority: util::tool_priority::PENCIL,
         })
         .insert(mouse::Clickable {
             w: 16.0,
             h: 16.0,
-            id: "core/tools/pencil".to_string(),
+            id: ButtonId::Tool(Tools::Pencil),
             hover_click: false,
         });
 }
@@ -64,28 +63,29 @@ fn update(
     mut grid: ResMut<Grid>,
     mut grid_changed: EventWriter<GridChanged>,
 ) {
-    if tool.0 != NAME { clicks.clear(); return; }
+    if tool.0 != Tools::Pencil { clicks.clear(); return; }
     for Clicked(id, right_button) in clicks.iter() {
-        let Some((x, y)) = util::get_grid_x_y(id) else { continue };
-        let Some((ref mut tile, _)) = grid.tiles.get_mut(&(x, y)) else { continue };
+        if let ButtonId::Grid(x, y) = id {
+            let Some((ref mut tile, _)) = grid.tiles.get_mut(&(*x, *y)) else { continue };
 
-        if *right_button {
-            // Tile info -> Selection
-            selection.bg = tile.bg;
-            ev_color.send(SelectColor(tile.bg, true));
-            selection.fg = tile.fg;
-            ev_color.send(SelectColor(tile.fg, false));
-            if !keys.pressed(KeyCode::LShift) {
-                selection.index = tile.index;
-                ev_tile.send(SelectTile(tile.index));
+            if *right_button {
+                // Tile info -> Selection
+                selection.bg = tile.bg;
+                ev_color.send(SelectColor(tile.bg, true));
+                selection.fg = tile.fg;
+                ev_color.send(SelectColor(tile.fg, false));
+                if !keys.pressed(KeyCode::LShift) {
+                    selection.index = tile.index;
+                    ev_tile.send(SelectTile(tile.index));
+                }
+            } else {
+                // Selection -> Tile info
+                tile.bg = selection.bg;
+                tile.fg = selection.fg;
+                if !keys.pressed(KeyCode::LShift) { tile.index = selection.index; }
+
+                grid_changed.send(GridChanged(vec![(*x, *y)]));
             }
-        } else {
-            // Selection -> Tile info
-            tile.bg = selection.bg;
-            tile.fg = selection.fg;
-            if !keys.pressed(KeyCode::LShift) { tile.index = selection.index; }
-
-            grid_changed.send(GridChanged(vec![(x, y)]));
         }
     }
 }

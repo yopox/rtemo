@@ -3,6 +3,8 @@ use bevy::sprite::Anchor;
 
 use crate::{AppState, mouse, util};
 use crate::loading::Textures;
+use crate::mouse::ButtonId;
+use crate::tools::Tools;
 
 pub(crate) struct PickPlugin;
 
@@ -17,8 +19,6 @@ impl Plugin for PickPlugin {
 
 #[derive(Component)]
 struct PickUI;
-
-pub const NAME: &str = "core/tools/pick";
 
 fn setup(
     mut commands: Commands,
@@ -38,14 +38,14 @@ fn setup(
             }
         ))
         .insert(crate::toolbar::Tool {
-            name: NAME.to_string(),
+            id: Tools::Eraser,
             shortcut: 'i',
             priority: util::tool_priority::PICK,
         })
         .insert(mouse::Clickable {
             w: 16.0,
             h: 16.0,
-            id: NAME.to_string(),
+            id: ButtonId::Tool(Tools::Eraser),
             hover_click: false,
         });
 }

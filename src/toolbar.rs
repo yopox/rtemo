@@ -3,14 +3,14 @@ use bevy::sprite::Anchor;
 
 use crate::{AppState, HEIGHT, tools, util};
 use crate::loading::Textures;
-use crate::mouse::{Clicked, Hover};
+use crate::mouse::{ButtonId, Clicked, Hover};
 
 pub struct ToolbarPlugin;
 
 impl Plugin for ToolbarPlugin {
     fn build(&self, app: &mut App) {
         app
-            .insert_resource(SelectedTool(tools::PENCIL_TOOL.to_string()))
+            .insert_resource(SelectedTool(tools::Tools::Pencil))
             .insert_resource(ToolbarItems(vec![]))
             .add_event::<UpdateToolbar>()
             .add_system(setup.in_schedule(OnEnter(AppState::Editor)))
@@ -24,13 +24,13 @@ impl Plugin for ToolbarPlugin {
 
 #[derive(Component)]
 pub struct Tool {
-    pub name: String,
+    pub id: tools::Tools,
     pub shortcut: char,
     pub priority: u16,
 }
 
 #[derive(Resource)]
-pub struct SelectedTool(pub String);
+pub struct SelectedTool(pub tools::Tools);
 
 #[derive(Component)]
 struct ToolbarUI;
@@ -140,7 +140,7 @@ fn update_gui(
             t2.translation.y = t.translation.y;
         }
 
-        if tool.name == selected_tool.0 {
+        if tool.id == selected_tool.0 {
             t1.translation.x = t.translation.x;
             t1.translation.y = t.translation.y;
         }
@@ -151,11 +151,10 @@ fn on_click(
     mut ev: EventReader<Clicked>,
     mut update: EventWriter<UpdateToolbar>,
     mut selected: ResMut<SelectedTool>,
-    tools: Query<&Tool>,
 ) {
     for Clicked(id, _) in ev.iter() {
-        if tools.iter().any(|tool_id| tool_id.name == *id) {
-            selected.0 = id.clone();
+        if let ButtonId::Tool(tool) = id {
+            selected.0 = *tool;
             update.send(UpdateToolbar);
         }
     }

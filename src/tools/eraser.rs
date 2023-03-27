@@ -4,9 +4,10 @@ use bevy::sprite::Anchor;
 use crate::{AppState, mouse, util};
 use crate::grid::{Grid, GridChanged};
 use crate::loading::Textures;
-use crate::mouse::Clicked;
+use crate::mouse::{ButtonId, Clicked};
 use crate::quick_tiles::Selection;
 use crate::toolbar::SelectedTool;
+use crate::tools::Tools;
 
 pub(crate) struct EraserPlugin;
 
@@ -21,8 +22,6 @@ impl Plugin for EraserPlugin {
 
 #[derive(Component)]
 struct EraserUI;
-
-pub const NAME: &str = "core/tools/eraser";
 
 fn setup(
     mut commands: Commands,
@@ -42,14 +41,14 @@ fn setup(
             }
         ))
         .insert(crate::toolbar::Tool {
-            name: NAME.to_string(),
+            id: Tools::Eraser,
             shortcut: 'e',
             priority: util::tool_priority::ERASER,
         })
         .insert(mouse::Clickable {
             w: 16.0,
             h: 16.0,
-            id: NAME.to_string(),
+            id: ButtonId::Tool(Tools::Eraser),
             hover_click: false,
         });
 }
@@ -61,17 +60,18 @@ fn update(
     mut grid: ResMut<Grid>,
     mut grid_changed: EventWriter<GridChanged>,
 ) {
-    if tool.0 != NAME { clicks.clear(); return; }
+    if tool.0 != Tools::Eraser { clicks.clear(); return; }
     for Clicked(id, _) in clicks.iter() {
-        let Some((x, y)) = util::get_grid_x_y(id) else { continue };
-        let Some((ref mut tile, _)) = grid.tiles.get_mut(&(x, y)) else { continue };
+        if let ButtonId::Grid(x, y) = id {
+            let Some((ref mut tile, _)) = grid.tiles.get_mut(&(*x, *y)) else { continue };
 
-        // Erase tile
-        tile.bg = selection.bg;
-        tile.fg = selection.fg;
-        tile.index = 0;
+            // Erase tile
+            tile.bg = selection.bg;
+            tile.fg = selection.fg;
+            tile.index = 0;
 
-        grid_changed.send(GridChanged(vec![(x, y)]));
+            grid_changed.send(GridChanged(vec![(*x, *y)]));
+        }
     }
 }
 
