@@ -26,10 +26,10 @@ struct TextUI;
 
 #[derive(Resource)]
 struct TextCursorState {
-    start_x: usize,
-    start_y: usize,
-    current_x: usize,
-    current_y: usize,
+    start_x: isize,
+    start_y: isize,
+    current_x: isize,
+    current_y: isize,
     frame: usize,
 }
 
@@ -131,7 +131,7 @@ fn on_type(
         if let Some(char) = util::get_char(key) {
             let (x, y) = (state.current_x, state.current_y);
             let Some(index) = util::char_to_tile(char) else { continue };
-            let Some((ref mut tile, _)) = grid.tiles.get_mut(&(x, y)) else {continue};
+            let Some((ref mut tile, _)) = grid.tiles.get_mut(&(x as isize, y as isize)) else {continue};
 
             // Update grid
             tile.index = index;

@@ -8,6 +8,8 @@ use strum::IntoEnumIterator;
 use crate::{AppState, util};
 use crate::loading::Textures;
 use crate::mouse::{ButtonId, Clickable, Clicked, Hover};
+use crate::toolbar::SelectedTool;
+use crate::tools::Tools;
 use crate::util::Palette;
 
 pub struct QuickTilesPlugin;
@@ -190,9 +192,11 @@ fn on_click(
 
 fn update_range(
     keys: Res<Input<KeyCode>>,
+    tool: Res<SelectedTool>,
     mut tiles: ResMut<QuickTiles>,
     mut changed: EventWriter<QuickTilesChanged>,
 ) {
+    if tool.0 == Tools::Resize { return; }
     let up = keys.just_pressed(KeyCode::Up);
     let down = keys.just_pressed(KeyCode::Down);
     if !up && !down { return; }

@@ -10,7 +10,7 @@ impl Plugin for MousePlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<Clicked>()
-            .add_system(update.in_set(OnUpdate(AppState::Editor)))
+            .add_system(update.in_base_set(CoreSet::Last))
             .add_system(cleanup.in_schedule(OnExit(AppState::Editor)));
     }
 }
@@ -21,7 +21,7 @@ struct MouseUI;
 #[derive(Copy, Clone)]
 pub enum ButtonId {
     Tool(Tools),
-    Grid(usize, usize),
+    Grid(isize, isize),
     QuickTile(usize),
     QuickColor(Palette),
     Custom(&'static str),

@@ -1,8 +1,5 @@
 use bevy::prelude::*;
 
-pub use eraser::NAME as ERASER_TOOL;
-pub use pencil::NAME as PENCIL_TOOL;
-
 mod pencil;
 mod eraser;
 mod pick;
