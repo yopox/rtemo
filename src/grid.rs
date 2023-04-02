@@ -128,11 +128,15 @@ fn update_hover_tile(
 
         if let Some(index) = index_override {
             tile.index = index.index;
+            tile.flip_x = false;
+            tile.rotation = 0;
             new_vis = index.visible;
             force_x = index.force_x;
             force_y = index.force_y;
         } else {
             tile.index = if tool.0 == Tools::Eraser { 0 } else { selection.index };
+            tile.flip_x = selection.flip;
+            tile.rotation = selection.rotation;
         }
 
         tile.bg = selection.bg.color();
@@ -243,6 +247,8 @@ fn update_grid(
             grid_tile.bg = t.bg.color();
             grid_tile.fg = t.fg.color();
             grid_tile.index = t.index;
+            grid_tile.rotation = t.rotation;
+            grid_tile.flip_x = t.flip.0;
         }
     }
 }

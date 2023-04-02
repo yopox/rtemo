@@ -24,6 +24,8 @@ impl Plugin for QuickTilesPlugin {
                 index: util::misc::DEFAULT_TILE,
                 bg: Palette::Black,
                 fg: Palette::White,
+                flip: false,
+                rotation: 0,
             })
             .add_system(setup.in_schedule(OnEnter(AppState::Editor)))
             .add_systems(
@@ -68,6 +70,8 @@ pub struct Selection {
     pub index: usize,
     pub bg: Palette,
     pub fg: Palette,
+    pub flip: bool,
+    pub rotation: u8,
 }
 
 fn setup(
@@ -226,12 +230,25 @@ fn update_tiles_index(
 }
 
 fn update_active_tile(
+    keys: Res<Input<KeyCode>>,
+    mut selection: ResMut<Selection>,
     mut select_tile: EventReader<SelectTile>,
     mut tile: Query<&mut TextModeTextureAtlasSprite, With<ActiveTile>>,
 ) {
+    let mut tile = tile.single_mut();
+
+    if keys.just_pressed(KeyCode::LControl) {
+        selection.flip = !selection.flip;
+        tile.flip_x = selection.flip;
+    } else if keys.just_pressed(KeyCode::LAlt) {
+        selection.rotation = (selection.rotation + 1) % 4;
+        tile.rotation = selection.rotation;
+    }
+
     for SelectTile(i) in select_tile.iter() {
-        let mut tile = tile.single_mut();
         tile.index = *i;
+        tile.flip_x = selection.flip;
+        tile.rotation = selection.rotation;
     }
 }
 
