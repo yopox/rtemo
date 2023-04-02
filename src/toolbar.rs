@@ -4,6 +4,7 @@ use bevy::sprite::Anchor;
 use crate::{AppState, HEIGHT, tools, util};
 use crate::loading::Textures;
 use crate::mouse::{ButtonId, Clicked, Hover};
+use crate::tools::ActivateTool;
 
 pub struct ToolbarPlugin;
 
@@ -154,8 +155,10 @@ fn on_click(
 ) {
     for Clicked(id, _) in ev.iter() {
         if let ButtonId::Tool(tool) = id {
-            selected.0 = *tool;
-            update.send(UpdateToolbar);
+            if tool.is_selectable() {
+                selected.0 = *tool;
+                update.send(UpdateToolbar);
+            }
         }
     }
 }

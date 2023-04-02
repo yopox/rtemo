@@ -11,6 +11,7 @@ pub mod tool_priority {
     pub const PICK: u16 = 40;
     pub const TEXT: u16 = 50;
     pub const RESIZE: u16 = 60;
+    pub const EXPORT: u16 = 70;
 }
 
 pub mod size {
@@ -36,7 +37,7 @@ pub mod misc {
     pub const QUICK_TILES_PER_ROW: usize = 32;
 }
 
-#[derive(EnumIter, Copy, Clone)]
+#[derive(EnumIter, Copy, Clone, Eq, Hash, PartialEq)]
 pub enum Palette {
     Black,
     White,

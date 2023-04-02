@@ -22,13 +22,8 @@ impl Plugin for GridPlugin {
             .add_system(setup.in_schedule(OnEnter(AppState::Editor)))
             .add_systems(
                 (update_hover_tile, update_grid, resize_grid)
-                .in_base_set(CoreSet::Update)
                 .in_set(OnUpdate(AppState::Editor))
             )
-            // .add_system(resize_grid
-            //     .in_base_set(CoreSet::Last)
-            //     .run_if(in_state(AppState::Editor))
-            // )
             .add_system(cleanup.in_schedule(OnExit(AppState::Editor)));
     }
 }
