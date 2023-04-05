@@ -1,8 +1,6 @@
 use bevy::prelude::{Color, KeyCode};
 use strum_macros::EnumIter;
 
-use crate::grid;
-
 pub mod tool_priority {
     pub const PENCIL: u16 = 0;
     pub const FILL: u16 = 10;
@@ -16,8 +14,8 @@ pub mod tool_priority {
 
 pub mod size {
     pub const ICON: f32 = 16.;
-    pub const GRID_X: usize = 12;
-    pub const GRID_Y: usize = 12;
+    pub const GRID_X: usize = 6;
+    pub const GRID_Y: usize = 6;
     pub const LEFT_MARGIN: f32 = 32.;
     pub const BOTTOM_MARGIN: f32 = 40.;
 }

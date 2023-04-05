@@ -19,6 +19,8 @@ impl Plugin for GridPlugin {
         app
             .add_event::<GridChanged>()
             .add_event::<GridResized>()
+            .add_event::<ZoomChanged>()
+            .insert_resource(Zoom(1.5))
             .add_system(setup.in_schedule(OnEnter(AppState::Editor)))
             .add_systems(
                 (update_hover_tile, update_grid, resize_grid)
@@ -63,6 +65,11 @@ pub struct Grid {
     pub tiles: HashMap<(isize, isize), (Tile, Entity)>,
 }
 
+#[derive(Resource)]
+pub struct Zoom(pub f32);
+
+pub struct ZoomChanged;
+
 pub struct GridResized;
 
 #[derive(Component)]
@@ -78,12 +85,13 @@ pub struct HoverTileIndexOverride {
 
 pub struct GridChanged(pub Vec<(isize, isize)>);
 
-fn grid_x(x: isize, x0: isize, w: usize) -> f32 { return -4. + LEFT_MARGIN + (WIDTH - LEFT_MARGIN - 8. * w as f32) / 2. + 8. * (x - x0) as f32 }
-fn grid_y(y: isize, y0: isize, h: usize) -> f32 { return -8. + HEIGHT - (HEIGHT - 8. * h as f32 - util::size::BOTTOM_MARGIN) / 2. - 8. * (y - y0) as f32 }
+fn grid_x(x: isize, x0: isize, w: usize, zoom: f32) -> f32 { return -4. * zoom + LEFT_MARGIN + (WIDTH - LEFT_MARGIN - 8. * zoom * w as f32) / 2. + 8. * zoom * (x - x0) as f32 }
+fn grid_y(y: isize, y0: isize, h: usize, zoom: f32) -> f32 { return -8. * zoom + HEIGHT - (HEIGHT - 8. * zoom * h as f32 - util::size::BOTTOM_MARGIN) / 2. - 8. * zoom * (y - y0) as f32 }
 
 fn setup(
     mut commands: Commands,
     mut grid_resized: EventWriter<GridResized>,
+    zoom: Res<Zoom>,
     textures: Res<Textures>,
 ) {
     let mut tiles: HashMap<(isize, isize), (Tile, Entity)> = HashMap::new();
@@ -105,7 +113,11 @@ fn setup(
                 ..Default::default()
             },
             texture_atlas: textures.mrmotext.clone(),
-            transform: Transform::from_xyz(0., 0., util::z::GRID_HOVER),
+            transform: Transform {
+                translation: Vec3::new(0., 0., util::z::GRID_HOVER),
+                scale: Vec3::new(zoom.0, zoom.0, 1.),
+                ..default()
+            },
             ..Default::default()
         })
         .insert(HoverTile)
@@ -117,6 +129,7 @@ fn update_hover_tile(
     tool: Res<SelectedTool>,
     keys: Res<Input<KeyCode>>,
     grid: Res<Grid>,
+    zoom: Res<Zoom>,
     index_override: Option<Res<HoverTileIndexOverride>>,
     mut hover_tile: Query<(&mut TextModeTextureAtlasSprite, &mut Visibility, &mut Transform), With<HoverTile>>,
     hovered: Query<&Transform, (With<crate::mouse::Hover>, With<GridUI>, Without<HoverTile>)>
@@ -154,8 +167,10 @@ fn update_hover_tile(
 
         if let (Some(x), Some(y)) = (force_x, force_y) {
             visibility.set_if_neq(new_vis);
-            position.translation.x = grid_x(x, grid.x0, grid.w);
-            position.translation.y = grid_y(y, grid.y0, grid.h);
+            position.translation.x = grid_x(x, grid.x0, grid.w, zoom.0);
+            position.translation.y = grid_y(y, grid.y0, grid.h, zoom.0);
+            position.scale.x = zoom.0;
+            position.scale.y = zoom.0;
         }
     }
 }
@@ -168,6 +183,7 @@ fn resize_grid(
     mut grid_resized: EventReader<GridResized>,
     textures: Res<Textures>,
     grid: Option<ResMut<Grid>>,
+    zoom: Res<Zoom>,
     mut transform: Query<&mut Transform, With<GridTile>>,
 ) { let Some(mut grid) = grid else { return; };
 
@@ -190,8 +206,8 @@ fn resize_grid(
         // Update tiles positions
         for (&(x, y), (_, id)) in grid.tiles.iter() {
             let Ok(mut transform) = transform.get_mut(*id) else { continue };
-            transform.translation.x = grid_x(x, grid.x0, grid.w);
-            transform.translation.y = grid_y(y, grid.y0, grid.h);
+            transform.translation.x = grid_x(x, grid.x0, grid.w, zoom.0);
+            transform.translation.y = grid_y(y, grid.y0, grid.h, zoom.0);
         }
 
         // Spawn missing tiles
@@ -212,17 +228,18 @@ fn resize_grid(
                         texture_atlas: textures.mrmotext.clone(),
                         transform: Transform {
                             translation: Vec3::new(
-                                grid_x(x, grid.x0, grid.w),
-                                grid_y(y, grid.y0, grid.h),
+                                grid_x(x, grid.x0, grid.w, zoom.0),
+                                grid_y(y, grid.y0, grid.h, zoom.0),
                                 util::z::GRID
                             ),
+                            scale: Vec3::new(zoom.0, zoom.0, 1.0),
                             ..Default::default()
                         },
                         ..Default::default()
                     })
                     .insert(Clickable {
-                        w: 8.,
-                        h: 8.,
+                        w: 8. * zoom.0,
+                        h: 8. * zoom.0,
                         id: ButtonId::Grid(x, y),
                         hover_click: true,
                     })
