@@ -234,6 +234,7 @@ fn update_active_tile(
     mut selection: ResMut<Selection>,
     mut select_tile: EventReader<SelectTile>,
     mut tile: Query<&mut TextModeTextureAtlasSprite, With<ActiveTile>>,
+    mut window: Query<&mut Window>,
 ) {
     let mut tile = tile.single_mut();
 
@@ -250,6 +251,8 @@ fn update_active_tile(
         tile.flip_x = selection.flip;
         tile.rotation = selection.rotation;
     }
+
+    window.single_mut().title = format!("rtemo (tile {}, flip {}, rotation {})", tile.index, tile.flip_x, tile.rotation);
 }
 
 fn update_colors(
