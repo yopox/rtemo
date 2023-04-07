@@ -73,8 +73,8 @@ fn update(
         let mut export = "[\n".to_string();
         for (&(x, y), (tile, _)) in tiles.iter() {
             let (Some(bg), Some(fg)) = (palette.get(&tile.bg), palette.get(&tile.fg)) else { continue };
-            info!("({}, {}, {}, {}, {}, {}, {}),", x - grid.x0, y - grid.y0, tile.index, bg, fg, tile.flip.0, tile.rotation);
-            export += &format!("    ({}, {}, {}, {}, {}, {}, {}),\n", x - grid.x0, y - grid.y0, tile.index, bg, fg, tile.flip.0, tile.rotation);
+            info!("({}, {}, {}, {}, {}, {}, {}),", x - grid.x0, grid.h as isize - 1 - (y - grid.y0), tile.index, bg, fg, tile.flip.0, tile.rotation);
+            export += &format!("    ({}, {}, {}, {}, {}, {}, {}),\n", x - grid.x0, grid.h as isize - 1 - (y - grid.y0), tile.index, bg, fg, tile.flip.0, tile.rotation);
         }
         export += "];";
 
