@@ -74,19 +74,21 @@ fn update(
                 ev_color.send(SelectColor(tile.bg, true));
                 selection.fg = tile.fg;
                 ev_color.send(SelectColor(tile.fg, false));
-                selection.rotation = tile.rotation;
-                selection.flip = tile.flip.0;
                 if !keys.pressed(KeyCode::LShift) {
                     selection.index = tile.index;
                     ev_tile.send(SelectTile(tile.index));
+                    selection.rotation = tile.rotation;
+                    selection.flip = tile.flip.0;
                 }
             } else {
                 // Selection -> Tile info
                 tile.bg = selection.bg;
                 tile.fg = selection.fg;
-                tile.rotation = selection.rotation;
-                tile.flip.0 = selection.flip;
-                if !keys.pressed(KeyCode::LShift) { tile.index = selection.index; }
+                if !keys.pressed(KeyCode::LShift) {
+                    tile.index = selection.index;
+                    tile.rotation = selection.rotation;
+                    tile.flip.0 = selection.flip;
+                }
 
                 grid_changed.send(GridChanged(vec![(*x, *y)]));
             }
