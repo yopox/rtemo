@@ -44,8 +44,8 @@ pub struct Tile {
 impl Default for Tile {
     fn default() -> Self {
         Tile {
-            bg: Palette::Black,
-            fg: Palette::White,
+            bg: Palette::Transparent,
+            fg: Palette::Black,
             index: 0,
             flip: (false, false),
             rotation: 0,
@@ -218,8 +218,8 @@ fn resize_grid(
                 let id = commands
                     .spawn(TextModeSpriteSheetBundle {
                         sprite: TextModeTextureAtlasSprite {
-                            bg: Color::BLACK,
-                            fg: Color::WHITE,
+                            bg: Palette::Transparent.color(),
+                            fg: Palette::Black.color(),
                             alpha: 1.,
                             index: 0,
                             anchor: Anchor::BottomLeft,

@@ -6,6 +6,7 @@ use crate::loading::LoadingPlugin;
 use crate::mouse::MousePlugin;
 use crate::quick_tiles::QuickTilesPlugin;
 use crate::toolbar::ToolbarPlugin;
+use crate::util::Palette;
 
 mod loading;
 mod toolbar;
@@ -27,7 +28,7 @@ const HEIGHT: f32 = 8. * 25.;
 
 fn main() {
     App::new()
-        .insert_resource(ClearColor(Color::hex("30303a").unwrap()))
+        .insert_resource(ClearColor(Palette::D.color()))
         .add_plugins(DefaultPlugins
             .set(ImagePlugin::default_nearest())
             .set(WindowPlugin {

@@ -22,8 +22,8 @@ impl Plugin for QuickTilesPlugin {
             .add_event::<QuickTilesChanged>()
             .insert_resource(Selection {
                 index: util::misc::DEFAULT_TILE,
-                bg: Palette::Black,
-                fg: Palette::White,
+                bg: Palette::Transparent,
+                fg: Palette::Black,
                 flip: false,
                 rotation: 0,
             })
@@ -116,8 +116,8 @@ fn setup(
     commands
         .spawn(TextModeSpriteSheetBundle {
             sprite: TextModeTextureAtlasSprite {
-                bg: Color::BLACK,
-                fg: Color::WHITE,
+                bg: Palette::Transparent.color(),
+                fg: Palette::Black.color(),
                 alpha: 1.,
                 index: util::misc::DEFAULT_TILE,
                 anchor: Anchor::BottomLeft,
@@ -143,7 +143,7 @@ fn setup(
                     anchor: Anchor::BottomLeft,
                     ..Default::default()
                 },
-                transform: Transform::from_xyz(8. + 8. * (i % 2) as f32, 64. - 8. * (i / 2) as f32, 0.),
+                transform: Transform::from_xyz(8. + 8. * (i % 2) as f32, 72. - 8. * (i / 2) as f32, 0.),
                 texture: textures.color.clone(),
                 ..Default::default()
             })
