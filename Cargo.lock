@@ -882,9 +882,9 @@ dependencies = [
 
 [[package]]
 name = "bevy_text_mode"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1702671b8753ae2e0f0e8bb4f14c10144e4b26683abb7bdf74c6ca8975875bf4"
+checksum = "e8bd04e4ed422b12c908ed1394847f0b19d9dad00c1e5daed2618271d1acda3a"
 dependencies = [
  "bevy",
  "bitflags",
