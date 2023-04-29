@@ -6,6 +6,7 @@ mod pick;
 mod text;
 mod resize;
 mod export;
+mod import;
 
 pub struct ToolsPlugin;
 
@@ -18,6 +19,7 @@ impl Plugin for ToolsPlugin {
             .add_plugin(text::TextPlugin)
             .add_plugin(resize::ResizePlugin)
             .add_plugin(export::ExportPlugin)
+            .add_plugin(import::ImportPlugin)
             // .add_plugin(pick::PickPlugin)
         ;
     }
@@ -31,6 +33,7 @@ pub enum Tools {
     Text,
     Resize,
     Export,
+    Import,
     Custom(&'static str),
     CustomNonSelectable(&'static str),
 }
@@ -38,7 +41,8 @@ pub enum Tools {
 impl Tools {
     pub fn is_selectable(&self) -> bool {
         match self {
-            Tools::Export | Tools::CustomNonSelectable(_) => false,
+            Tools::Export | Tools::Import
+            | Tools::CustomNonSelectable(_) => false,
             _ => true,
         }
     }

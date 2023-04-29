@@ -33,6 +33,7 @@ impl Plugin for GridPlugin {
 #[derive(Component)]
 struct GridUI;
 
+#[derive(Clone)]
 pub struct Tile {
     pub bg: Palette,
     pub fg: Palette,
@@ -215,41 +216,56 @@ fn resize_grid(
             for x in grid.x0..(grid.x0 + w) {
                 if grid.tiles.contains_key(&(x, y)) { continue }
 
-                let id = commands
-                    .spawn(TextModeSpriteSheetBundle {
-                        sprite: TextModeTextureAtlasSprite {
-                            bg: Palette::Transparent.color(),
-                            fg: Palette::Black.color(),
-                            alpha: 1.,
-                            index: 0,
-                            anchor: Anchor::BottomLeft,
-                            ..Default::default()
-                        },
-                        texture_atlas: textures.mrmotext.clone(),
-                        transform: Transform {
-                            translation: Vec3::new(
-                                grid_x(x, grid.x0, grid.w, zoom.0),
-                                grid_y(y, grid.y0, grid.h, zoom.0),
-                                util::z::GRID
-                            ),
-                            scale: Vec3::new(zoom.0, zoom.0, 1.0),
-                            ..Default::default()
-                        },
-                        ..Default::default()
-                    })
-                    .insert(Clickable {
-                        w: 8. * zoom.0,
-                        h: 8. * zoom.0,
-                        id: ButtonId::Grid(x, y),
-                        hover_click: true,
-                    })
-                    .insert(GridUI)
-                    .insert(GridTile)
-                    .id();
+                let id = spawn_tile(&mut commands, x, y, &Tile::default(), &grid, &textures, &zoom);
                 grid.tiles.insert((x, y), (Tile::default(), id));
             }
         }
     }
+}
+
+pub fn spawn_tile(
+    commands: &mut Commands,
+    x: isize,
+    y: isize,
+    tile: &Tile,
+    grid: &ResMut<Grid>,
+    textures: &Res<Textures>,
+    zoom: &Res<Zoom>,
+) -> Entity {
+    commands
+        .spawn(TextModeSpriteSheetBundle {
+            sprite: TextModeTextureAtlasSprite {
+                bg: tile.bg.color(),
+                fg: tile.fg.color(),
+                alpha: 1.,
+                index: tile.index,
+                anchor: Anchor::BottomLeft,
+                rotation: tile.rotation,
+                flip_x: tile.flip.0,
+                flip_y: tile.flip.1,
+                ..Default::default()
+            },
+            texture_atlas: textures.mrmotext.clone(),
+            transform: Transform {
+                translation: Vec3::new(
+                    grid_x(x, grid.x0, grid.w, zoom.0),
+                    grid_y(y, grid.y0, grid.h, zoom.0),
+                    util::z::GRID
+                ),
+                scale: Vec3::new(zoom.0, zoom.0, 1.0),
+                ..Default::default()
+            },
+            ..Default::default()
+        })
+        .insert(Clickable {
+            w: 8. * zoom.0,
+            h: 8. * zoom.0,
+            id: ButtonId::Grid(x, y),
+            hover_click: true,
+        })
+        .insert(GridUI)
+        .insert(GridTile)
+        .id()
 }
 
 fn update_grid(

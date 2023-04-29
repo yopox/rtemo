@@ -10,6 +10,7 @@ pub mod tool_priority {
     pub const TEXT: u16 = 50;
     pub const RESIZE: u16 = 60;
     pub const EXPORT: u16 = 70;
+    pub const IMPORT: u16 = 80;
 }
 
 pub mod size {
@@ -127,7 +128,11 @@ pub fn char_to_tile(c: char) -> Option<usize> {
     return Some(result)
 }
 
-#[test]
-fn test() {
-
-}
+pub type X = usize;
+pub type Y = usize;
+pub type INDEX = usize;
+pub type BG = usize;
+pub type FG = usize;
+pub type FLIP = bool;
+pub type ROTATION = u8;
+pub type TILE = (X, Y, INDEX, BG, FG, FLIP, ROTATION);
