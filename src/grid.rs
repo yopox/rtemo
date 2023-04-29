@@ -45,8 +45,8 @@ pub struct Tile {
 impl Default for Tile {
     fn default() -> Self {
         Tile {
-            bg: Palette::Transparent,
-            fg: Palette::Black,
+            bg: Palette::E,
+            fg: Palette::A,
             index: 0,
             flip: (false, false),
             rotation: 0,

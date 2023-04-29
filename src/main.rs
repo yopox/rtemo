@@ -28,7 +28,7 @@ const HEIGHT: f32 = 8. * 25.;
 
 fn main() {
     App::new()
-        .insert_resource(ClearColor(Palette::D.color()))
+        .insert_resource(ClearColor(Palette::Black.color()))
         .add_plugins(DefaultPlugins
             .set(ImagePlugin::default_nearest())
             .set(WindowPlugin {
