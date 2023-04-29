@@ -38,8 +38,6 @@ pub mod misc {
 
 #[derive(EnumIter, Copy, Clone, Eq, Hash, PartialEq)]
 pub enum Palette {
-    Transparent,
-    Black,
     A,
     B,
     C,
@@ -56,13 +54,15 @@ pub enum Palette {
     N,
     O,
     P,
+    Transparent,
+    Black,
 }
 
 impl Palette {
     pub fn color(&self) -> Color {
         match self {
             Palette::Transparent => Color::hex("00000000"),
-            Palette::Black => Color::hex("000000"),
+            Palette::Black => Color::hex("00000000"),
             Palette::A => Color::hex("#ffffff"),
             Palette::B => Color::hex("#6df7c1"),
             Palette::C => Color::hex("#11adc1"),
