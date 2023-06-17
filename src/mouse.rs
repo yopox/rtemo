@@ -18,7 +18,7 @@ impl Plugin for MousePlugin {
 #[derive(Component)]
 struct MouseUI;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum ButtonId {
     Tool(Tools),
     Grid(isize, isize),
@@ -72,6 +72,7 @@ fn update(
             let do_click = hover && (just_clicked_left || just_clicked_right);
             let do_hover_click = hover && clicked_left && c.hover_click;
             if already_clicked.is_none() && (do_click || do_hover_click) {
+                // bevy::log::info!("Clicked {:?}", c.id);
                 ev.send(Clicked(c.id.clone(), just_clicked_right));
                 entity.insert(AlreadyClicked);
             }

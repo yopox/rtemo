@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use bevy::prelude::*;
-use bevy::reflect::List;
 use bevy::sprite::Anchor;
 use strum::IntoEnumIterator;
 
@@ -10,7 +9,7 @@ use crate::grid::{Grid, GridResized, Tile, Zoom};
 use crate::loading::Textures;
 use crate::mouse::{ButtonId, Clicked};
 use crate::tools::Tools;
-use crate::util::Palette;
+use crate::util::{Palette, TILE};
 
 pub(crate) struct ImportPlugin;
 
@@ -75,9 +74,11 @@ fn update(
 
         let mut new_tiles = HashMap::new();
 
-        for line in clipboard.lines() {
-            let Some(tile) = parse_tile(line) else { continue; };
+        let tiles: Vec<TILE> = clipboard.lines().filter_map(|line| parse_tile(line)).collect::<Vec<TILE>>();
+        let Some(max_x) = tiles.iter().map(|t| t.0).max() else { continue };
+        let Some(max_y) = tiles.iter().map(|t| t.1).max() else { continue };
 
+        for tile in tiles {
             let t = Tile {
                 bg: palette[tile.3],
                 fg: palette[tile.4],
@@ -88,7 +89,7 @@ fn update(
 
             let id = grid::spawn_tile(
                 &mut commands,
-                tile.0 as isize, tile.1 as isize,
+                tile.0 as isize, max_y as isize - tile.1 as isize,
                 &t, &grid, &textures, &zoom
             );
 
@@ -96,15 +97,13 @@ fn update(
             // println!("{} {} {} {} {} {} {}", tile.0, tile.1, tile.2, tile.3, tile.4, tile.5, tile.6);
         }
 
-        let Some(max_x) = new_tiles.keys().map(|(x, _)| *x).max() else { continue };
-        let Some(max_y) = new_tiles.keys().map(|(_, y)| *y).max() else { continue };
         grid.x0 = 0;
         grid.y0 = 0;
         grid.w = max_x as usize + 1;
         grid.h = max_y as usize + 1;
 
         for ((x, y), (t, e)) in new_tiles.iter() {
-            grid.tiles.insert((*x, max_y - *y), (t.to_owned(), *e));
+            grid.tiles.insert((*x, max_y as isize - *y), (t.to_owned(), *e));
         }
 
         grid_resized.send(GridResized);

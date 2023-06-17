@@ -36,7 +36,7 @@ pub mod misc {
     pub const QUICK_TILES_PER_ROW: usize = 32;
 }
 
-#[derive(EnumIter, Copy, Clone, Eq, Hash, PartialEq)]
+#[derive(EnumIter, Copy, Clone, Eq, Hash, PartialEq, Debug)]
 pub enum Palette {
     A,
     B,

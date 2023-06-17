@@ -25,7 +25,7 @@ impl Plugin for ToolsPlugin {
     }
 }
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub enum Tools {
     Pencil,
     Eraser,
